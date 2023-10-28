@@ -20,6 +20,7 @@
 ## TODOs:
 - Set up the vps and think of a way to make our workflow headache-free
 - Install openproject and setup everything needed
+- DB Design
 - Make the base of the project (auth, accounts, posting stories, voting, profile endpoint, etc)
 - QOL features
 - Revenue related stuff
