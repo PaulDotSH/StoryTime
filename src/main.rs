@@ -37,6 +37,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             state.clone(),
             endpoints::auth::auth_middleware,
         ))
+        .route("/login", post(endpoints::login::login_handler))
         .route("/register", post(endpoints::register::register_handler))
         .with_state(state)
         .route("/", get(sample_response_handler));
