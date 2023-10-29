@@ -10,6 +10,7 @@ use rand::distributions::{Alphanumeric, DistString};
 use rand::thread_rng;
 use serde::{Deserialize, Serialize};
 use sqlx::query;
+use crate::endpoints::common::generate_token;
 
 #[derive(Serialize, Deserialize)]
 pub struct CreateAccount {
@@ -21,10 +22,6 @@ pub struct CreateAccount {
 //TODO: Regex email verification
 //TODO: Email verification
 //TODO: Login handler
-
-fn generate_token(length: usize) -> String {
-    Alphanumeric.sample_string(&mut thread_rng(), length)
-}
 
 pub async fn register_handler(
     State(state): State<AppState>,
@@ -49,7 +46,7 @@ pub async fn register_handler(
     )
     .execute(&state.postgres)
     .await?;
-    println!("Registered user token is {token}");
+
     // 24 * 7 * 3600
     let cookie = format!("TOKEN={}; Path=/; Max-Age=604800", &token);
 
