@@ -1587,6 +1587,8 @@ dependencies = [
  "argon2",
  "axum",
  "chrono",
+ "dotenvy",
+ "rand",
  "serde",
  "serde_json",
  "sqlx",
