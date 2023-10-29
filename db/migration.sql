@@ -12,11 +12,11 @@ CREATE COLLATION IF NOT EXISTS case_insensitive (
 
 CREATE TABLE IF NOT EXISTS users (
                                      username Text PRIMARY KEY COLLATE case_insensitive,
-                                     email Text NOT NULL,
+                                     email Text NOT NULL UNIQUE,
                                      pw Text NOT NULL,
                                      perm smallint NOT NULL DEFAULT 1,
                                      pw_changed Timestamp NOT NULL DEFAULT NOW(),
-                                     token Text,
+                                     token Text UNIQUE,
                                      tok_expire Timestamp NOT NULL DEFAULT NOW() + INTERVAL '7 days',
                                      score int NOT NULL DEFAULT 0
 );

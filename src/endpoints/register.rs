@@ -1,12 +1,15 @@
-use argon2::{Argon2, PasswordHasher, password_hash::{SaltString, rand_core::OsRng}};
-use serde::{Deserialize, Serialize};
-use axum::{extract::{Path, Query, State}, Json};
-use axum::http::{header, HeaderMap, StatusCode};
-use axum::response::{Response, IntoResponse, Redirect};
+use crate::{error::AppError, user::Role, AppState};
+use argon2::{
+    password_hash::{rand_core::OsRng, SaltString},
+    Argon2, PasswordHasher,
+};
+use axum::http::{header, HeaderMap};
+use axum::response::{IntoResponse, Redirect, Response};
+use axum::{extract::State, Json};
 use rand::distributions::{Alphanumeric, DistString};
 use rand::thread_rng;
+use serde::{Deserialize, Serialize};
 use sqlx::query;
-use crate::{AppState, error::AppError, user::Role};
 
 #[derive(Serialize, Deserialize)]
 pub struct CreateAccount {
@@ -15,7 +18,6 @@ pub struct CreateAccount {
     password: String,
 }
 
-//TODO: Auth middleware
 //TODO: Regex email verification
 //TODO: Email verification
 //TODO: Login handler
@@ -24,9 +26,14 @@ fn generate_token(length: usize) -> String {
     Alphanumeric.sample_string(&mut thread_rng(), length)
 }
 
-pub async fn register_handler(State(state): State<AppState>, Json(payload): Json<CreateAccount>) -> Result<Response, AppError> {
+pub async fn register_handler(
+    State(state): State<AppState>,
+    Json(payload): Json<CreateAccount>,
+) -> Result<Response, AppError> {
     let salt = SaltString::generate(&mut OsRng);
-    let password = Argon2::default().hash_password(payload.password.as_bytes(), &salt).unwrap();
+    let password = Argon2::default()
+        .hash_password(payload.password.as_bytes(), &salt)
+        .unwrap();
 
     let token = generate_token(128);
     query!(
@@ -40,10 +47,11 @@ pub async fn register_handler(State(state): State<AppState>, Json(payload): Json
         Role::UnconfirmedMail as i16,
         &token
     )
-        .execute(&state.postgres)
-        .await?;
-
-    let cookie = format!("TOKEN={}; Path=/; Max-Age=300", &token);
+    .execute(&state.postgres)
+    .await?;
+    println!("Registered user token is {token}");
+    // 24 * 7 * 3600
+    let cookie = format!("TOKEN={}; Path=/; Max-Age=604800", &token);
 
     let mut headers = HeaderMap::new();
     headers.insert(header::SET_COOKIE, cookie.parse().unwrap());

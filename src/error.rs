@@ -1,4 +1,7 @@
-use axum::{http::StatusCode, response::{IntoResponse, Response}};
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
 
 // Make our own error that wraps `anyhow::Error`, since we cannot modify a struct or a trait from another crate
 #[derive(Debug)]
@@ -18,8 +21,8 @@ impl IntoResponse for AppError {
 // This enables using `?` on functions that return `Result<_, anyhow::Error>` to turn them into
 // `Result<_, AppError>`. That way you don't need to do that manually.
 impl<E> From<E> for AppError
-    where
-        E: Into<anyhow::Error>,
+where
+    E: Into<anyhow::Error>,
 {
     fn from(err: E) -> Self {
         Self(err.into())
