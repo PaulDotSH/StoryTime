@@ -13,7 +13,8 @@
 
 ### 1.2 Backend
 1. Install rust (make sure cargo and rustc are installed)
-2. Run `cargo run` or `cargo run --release` in the main folder
+2. Make sure your .env is configured, since the password is very long and contains unusual characters, you can use `export $(cat .env | grep DATABASE_URL)`
+3. Run `cargo run` or `cargo run --release` in the main folder
 
 ## 2. FAQ
 
