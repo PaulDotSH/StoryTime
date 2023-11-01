@@ -5,10 +5,11 @@ pub mod user;
 use axum::routing::{get, post, put};
 use axum::{middleware, Router};
 use sqlx::postgres::PgPoolOptions;
-use sqlx::{Pool, Postgres};
+use sqlx::{Pool, Postgres, query};
 use std::env;
 use std::error::Error;
 use std::net::SocketAddr;
+use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -49,6 +50,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .route(
             "/snippets/:id",
             put(endpoints::story_snippet::edit_story_snippet),
+        )
+        .route(
+            "/snippets/:id/comments/new",
+            post(endpoints::comments::new_comment),
+        )
+        .route(
+            "/snippets/:id/comments",
+            get(endpoints::comments::get_story_comments),
+        )
+        .route(
+            "/comments/:id",
+            put(endpoints::comments::edit_comment),
         )
         .layer(middleware::from_fn_with_state(
             state.clone(),
