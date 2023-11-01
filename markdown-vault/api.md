@@ -125,7 +125,8 @@ OR
     "modified": "Optional<DateTime>",
     "child_cannon_time": "DateTime",
     "parent": "Optional<Uuid>",
-    "child": "Optional<Uuid>"
+    "child": "Optional<Uuid>",
+    "score": "int"
 }
 ```
 ### Get snippet children
@@ -134,7 +135,7 @@ OR
 #### Input:
 Type: `Query parameter`
 ```
-last_points: Optional<Int>
+last_score: Optional<Int>
 ```
 #### Output:
 ```
@@ -151,8 +152,75 @@ OR
     "modified": "Optional<DateTime>",
     "child_cannon_time": "DateTime",
     "parent": "Optional<Uuid>",
-    "child": "Optional<Uuid>"
+    "child": "Optional<Uuid>",
+    "score": "Int"
   },
   ...
+]
+```
+## Comments
+### Post new comment
+#### Endpoint:
+`POST` `/snippets/:id/comments/new`
+#### Input:
+Type: `Json`
+```
+body: string
+```
+Example:
+```
+{
+    "body": "Test comment"
+}
+```
+#### Output:
+```
+Status code 500 (lack of permission or db error)
+OR
+Status code 200 with the comment id
+```
+### Edit comment
+#### Endpoint:
+`PUT` `/comments/:id`
+#### Input:
+Type: `Json`
+```
+body: string
+```
+Example:
+```
+{
+    "body": "Edited comment"
+}
+```
+#### Output:
+```
+Status code 500 (lack of permission or db error)
+OR
+Status code 200
+```
+### View snippet comments
+#### Endpoint:
+`PUT` `/snippets/:id/comments`
+#### Input:
+Type: `Query parameter`
+```
+last_score: Optional<Int>
+```
+#### Output:
+```
+Status code 500 (lack of permission or db error)
+```
+OR
+```json
+[
+    {
+        "id": "Uuid",
+        "writer": "String",
+        "body": "String",
+        "created": "DateTime",
+        "modified": "Optional<DateTime>",
+        "score": "Int"
+    }
 ]
 ```

@@ -56,17 +56,16 @@ pub struct GetStory {
 
 #[derive(Deserialize)]
 pub struct StoryPagination {
-    last_points: i32,
+    last_score: i32,
 }
 impl Default for StoryPagination {
     fn default() -> Self {
         Self {
-            last_points: i32::MAX,
+            last_score: i32::MAX,
         }
     }
 }
 
-//id, writer, body, created, modified, child_cannon_time, parent, child
 #[derive(sqlx::FromRow, Debug, Serialize)]
 pub struct StorySnippet {
     id: Uuid,
@@ -77,6 +76,7 @@ pub struct StorySnippet {
     child_cannon_time: Option<NaiveDateTime>,
     parent: Option<Uuid>,
     child: Option<Uuid>,
+    score: i32,
 }
 
 //TODO: Get comments too when the system is implemented
@@ -87,7 +87,7 @@ pub async fn get_story(
     let parent = query_as!(
         StorySnippet,
         r#"
-        SELECT id, writer, body, created, modified, child_cannon_time, parent, child FROM story_parts WHERE id = $1
+        SELECT id, writer, body, created, modified, child_cannon_time, parent, child, score FROM story_parts WHERE id = $1
         "#,
         id,
     ).fetch_one(&state.postgres).await?;
@@ -106,12 +106,12 @@ pub async fn get_story_children(
     let stories = query_as!(
         StorySnippet,
         r#"
-        SELECT id, writer, body, created, modified, child_cannon_time, parent, child FROM story_parts WHERE parent = $1 AND points < $2
-        ORDER BY points DESC, id
+        SELECT id, writer, body, created, modified, child_cannon_time, parent, child, score FROM story_parts WHERE parent = $1 AND score < $2
+        ORDER BY score DESC, id
         LIMIT 5;
         "#,
         id,
-        pagination.last_points
+        pagination.last_score
     ).fetch_all(&state.postgres).await?;
 
     Ok(Json(stories))
@@ -183,7 +183,7 @@ pub async fn edit_story_snippet(
         .await?;
         if resp.rows_affected() == 0 {
             return Err(AppError(anyhow!(
-                "You do not have permission to edit this snippet"
+                "You do not have permission to edit this snippet or it does not exist"
             )));
         }
     } else {
