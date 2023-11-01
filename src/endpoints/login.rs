@@ -1,16 +1,16 @@
-use anyhow::anyhow;
+use crate::endpoints::common::{generate_token, FORMAT};
 use crate::{error::AppError, user::Role, AppState};
-use argon2::{password_hash::{rand_core::OsRng, SaltString}, Argon2, PasswordHasher, PasswordHash, PasswordVerifier};
+use anyhow::anyhow;
+use argon2::{
+    password_hash::{rand_core::OsRng, SaltString},
+    Argon2, PasswordHash, PasswordHasher, PasswordVerifier,
+};
 use axum::http::{header, HeaderMap};
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::{extract::State, Json};
-use rand::distributions::{Alphanumeric, DistString};
-use rand::thread_rng;
+use chrono::{Duration, NaiveDate, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{query, query_scalar};
-use tower_http::classify::ServerErrorsFailureClass::StatusCode;
-use crate::endpoints::common::{FORMAT, generate_token};
-use chrono::{Utc, Duration, NaiveDate, NaiveDateTime};
 
 #[derive(Serialize, Deserialize)]
 pub struct Login {
@@ -22,15 +22,17 @@ pub async fn login_handler(
     State(state): State<AppState>,
     Json(payload): Json<Login>,
 ) -> Result<Response, AppError> {
-
-    let pw: String = query_scalar!(
+    let Ok(pw): Result<String, _> = query_scalar!(
         r#"
         SELECT pw from users where username = $1
         "#,
         payload.username,
     )
-        .fetch_one(&state.postgres)
-        .await?;
+    .fetch_one(&state.postgres)
+    .await
+    else {
+        return Err(AppError(anyhow!("User doesn't exist")));
+    };
 
     let Ok(parsed_hash) = PasswordHash::new(&pw) else {
         // Case where user is banned, TODO: implement user banning endpoint and temporary banning using another field in the database
@@ -38,7 +40,10 @@ pub async fn login_handler(
         return Err(AppError(anyhow!("User was permanently banned")));
     };
 
-    if Argon2::default().verify_password(payload.password.as_bytes(), &parsed_hash).is_err() {
+    if Argon2::default()
+        .verify_password(payload.password.as_bytes(), &parsed_hash)
+        .is_err()
+    {
         return Err(AppError(anyhow!("Incorrect Password")));
     }
 
@@ -50,9 +55,8 @@ pub async fn login_handler(
         (Utc::now() + Duration::days(7)).naive_utc(),
         payload.username
     )
-        .execute(&state.postgres)
-        .await?;
-
+    .execute(&state.postgres)
+    .await?;
     let cookie = format!("TOKEN={}; Path=/; Max-Age=604800", &token);
 
     let mut headers = HeaderMap::new();

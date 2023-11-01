@@ -1,3 +1,4 @@
+use crate::endpoints::common::generate_token;
 use crate::{error::AppError, user::Role, AppState};
 use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
@@ -10,7 +11,6 @@ use rand::distributions::{Alphanumeric, DistString};
 use rand::thread_rng;
 use serde::{Deserialize, Serialize};
 use sqlx::query;
-use crate::endpoints::common::generate_token;
 
 #[derive(Serialize, Deserialize)]
 pub struct CreateAccount {
