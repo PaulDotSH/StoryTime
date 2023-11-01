@@ -16,7 +16,7 @@ struct User {
 pub async fn auth_middleware<B>(
     State(state): State<AppState>,
     mut request: Request<B>, // insert the username and role headers in the following requests in case they are needed so we don't hit the database again
-    next: Next<B>, // So we can forward the request
+    next: Next<B>,           // So we can forward the request
 ) -> Response {
     let headers = request.headers_mut();
 
@@ -50,7 +50,7 @@ pub async fn auth_middleware<B>(
                 )
                 .execute(&state.postgres)
                 .await
-                .unwrap(); // Shouldn't fail, if it does "it is what it is"
+                .unwrap(); // Shouldn't fail
                 return StatusCode::UNAUTHORIZED.into_response();
             }
 

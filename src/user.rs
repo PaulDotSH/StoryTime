@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
 
 #[repr(i16)]
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -18,5 +19,28 @@ impl From<i16> for Role {
             3 => Role::Admin,
             _ => Role::Banned,
         }
+    }
+}
+
+impl Display for Role {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Role::Banned => {
+                    "Banned"
+                }
+                Role::UnconfirmedMail => {
+                    "Unconfirmed Mail"
+                }
+                Role::User => {
+                    "User"
+                }
+                Role::Admin => {
+                    "Admin"
+                }
+            }
+        )
     }
 }

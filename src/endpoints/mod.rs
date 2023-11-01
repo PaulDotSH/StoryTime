@@ -1,4 +1,5 @@
 pub mod auth;
+mod common;
 pub mod login;
 pub mod register;
-mod common;
+pub mod story_snippet;

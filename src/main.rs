@@ -2,7 +2,7 @@ mod endpoints;
 pub mod error;
 pub mod user;
 
-use axum::routing::{get, post};
+use axum::routing::{get, post, put};
 use axum::{middleware, Router};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
@@ -33,6 +33,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let app = Router::new()
         .route("/auth-only", get(sample_response_handler))
+        .route("/snippets/:id", get(endpoints::story_snippet::get_story))
+        .route(
+            "/snippets/:id/children",
+            get(endpoints::story_snippet::get_story_children),
+        )
+        .route(
+            "/snippets/new",
+            post(endpoints::story_snippet::new_story_snippet),
+        )
+        .route(
+            "/snippets/:id/new",
+            post(endpoints::story_snippet::new_story_snippet_continuation),
+        )
+        .route(
+            "/snippets/:id",
+            put(endpoints::story_snippet::edit_story_snippet),
+        )
         .layer(middleware::from_fn_with_state(
             state.clone(),
             endpoints::auth::auth_middleware,
