@@ -224,3 +224,21 @@ OR
     }
 ]
 ```
+### Vote snippet
+#### Endpoint:
+`POST` `/snippets/:id/vote`
+#### Input:
+Type: `Json`
+```
+"Up"
+```
+or
+```
+"Down"
+```
+#### Output:
+```
+Status code 200
+OR
+Status code 500 (lack of permission or db error)
+```

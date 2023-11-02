@@ -5,7 +5,7 @@ use crate::user::Role::User;
 use crate::{error::AppError, user::Role, AppState};
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
-use axum::http::{header, HeaderMap};
+use axum::http::{StatusCode, header, HeaderMap};
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::{extract::State, Json};
 use chrono::{Duration, NaiveDate, NaiveDateTime, Utc};
@@ -73,10 +73,11 @@ pub struct StorySnippet {
     body: String,
     created: NaiveDateTime,
     modified: Option<NaiveDateTime>,
-    child_cannon_time: Option<NaiveDateTime>,
+    child_cannon_time: NaiveDateTime,
     parent: Option<Uuid>,
-    child: Option<Uuid>,
     score: i32,
+    is_final: bool,
+    child: Option<Uuid>,
 }
 
 //TODO: Get comments too when the system is implemented
@@ -87,7 +88,7 @@ pub async fn get_story(
     let parent = query_as!(
         StorySnippet,
         r#"
-        SELECT id, writer, body, created, modified, child_cannon_time, parent, child, score FROM story_parts WHERE id = $1
+        SELECT id, writer, body, created, modified, child_cannon_time, parent, child, score, is_final FROM story_parts WHERE id = $1
         "#,
         id,
     ).fetch_one(&state.postgres).await?;
@@ -106,7 +107,7 @@ pub async fn get_story_children(
     let stories = query_as!(
         StorySnippet,
         r#"
-        SELECT id, writer, body, created, modified, child_cannon_time, parent, child, score FROM story_parts WHERE parent = $1 AND score < $2
+        SELECT id, writer, body, created, modified, child_cannon_time, parent, child, score, is_final FROM story_parts WHERE parent = $1 AND score < $2
         ORDER BY score DESC, id
         LIMIT 5;
         "#,
@@ -115,6 +116,55 @@ pub async fn get_story_children(
     ).fetch_all(&state.postgres).await?;
 
     Ok(Json(stories))
+}
+
+#[repr(i16)]
+#[derive(Deserialize, Serialize, Debug)]
+pub enum Vote {
+    Up = 1,
+    Down = -1,
+}
+
+pub async fn vote_snippet(Path(id): Path<Uuid>, headers: HeaderMap, State(state): State<AppState>, Json(payload): Json<Vote>)
+    -> Result<StatusCode, AppError> {
+    let role = get_role_from_header(&headers);
+    if role < User {
+        return Err(AppError(anyhow!("You do not have permission")))
+    }
+
+    let username = get_username_from_header(&headers); // This cannot fail since we set it in middleware
+
+    let result = sqlx::query!(
+        "INSERT INTO snippet_votes (users, snippet, vote_type) VALUES ($1, $2, $3)",
+        username,
+        id,
+        payload as i16
+    )
+        .execute(&state.postgres)
+        .await?;
+
+
+    Ok(StatusCode::OK)
+}
+
+pub async fn remove_vote(Path(id): Path<Uuid>, headers: HeaderMap, State(state): State<AppState>)
+    -> Result<StatusCode, AppError> {
+    let role = get_role_from_header(&headers);
+    if role < User {
+        return Err(AppError(anyhow!("You do not have permission")))
+    }
+
+    let username = get_username_from_header(&headers); // This cannot fail since we set it in middleware
+
+    let result = sqlx::query!(
+        "DELETE FROM snippet_votes WHERE users = $1 AND snippet = $2",
+        username,
+        id
+    )
+        .execute(&state.postgres)
+        .await?;
+
+    Ok(StatusCode::OK)
 }
 
 #[derive(Serialize, Deserialize)]

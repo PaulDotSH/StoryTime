@@ -118,7 +118,8 @@ pub struct Comment {
     body: String,
     created: NaiveDateTime,
     modified: Option<NaiveDateTime>,
-    score: i32
+    score: i32,
+    // snippet: Uuid
 }
 
 pub async fn get_story_comments(

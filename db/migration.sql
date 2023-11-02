@@ -21,25 +21,26 @@ CREATE TABLE IF NOT EXISTS users (
                                      score int NOT NULL DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS story_parts (
-                                           id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-                                           writer Text NOT NULL REFERENCES users(username),
-                                           body Text NOT NULL,
-                                           created Timestamp NOT NULL DEFAULT NOW(),
-                                           modified Timestamp DEFAULT NULL,
-                                           child_cannon_time Timestamp DEFAULT NOW() + INTERVAL '24 hours', -- Null unless the story part is "cannon"
-                                           first UUID REFERENCES story_parts(id), -- optimization for going to the top, not sure if to keep or not
-                                           parent UUID REFERENCES story_parts(id), -- used to search for "child" stories
-                                           score Int NOT NULL DEFAULT 0, -- cache for upvote - downvote
-                                           child UUID REFERENCES story_parts(id) -- update when a child becomes cannon
-);
+    CREATE TABLE IF NOT EXISTS story_parts (
+                                               id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+                                               writer Text NOT NULL REFERENCES users(username),
+                                               body Text NOT NULL,
+                                               created Timestamp NOT NULL DEFAULT NOW(),
+                                               modified Timestamp DEFAULT NULL,
+                                               child_cannon_time Timestamp NOT NULL DEFAULT NOW() + INTERVAL '24 hours', -- Null unless the story part is "cannon"
+                                               first UUID REFERENCES story_parts(id), -- optimization for going to the top, not sure if to keep or not
+                                               parent UUID REFERENCES story_parts(id), -- used to search for "child" stories
+                                               score Int NOT NULL DEFAULT 0, -- cache for upvote - downvote
+                                               is_final bool NOT NULL DEFAULT FALSE,
+                                               child UUID REFERENCES story_parts(id) -- update when a child becomes cannon
+    );
 
 CREATE INDEX IF NOT EXISTS idx_cannon_expire ON story_parts(child_cannon_time DESC); -- Index for searching for which expires first
 -- CREATE INDEX IF NOT EXISTS idx_parent_part_id ON story_parts(parent);
 CREATE INDEX IF NOT EXISTS idx_user_token ON users USING hash(token); -- Helps search for an user with a hash1
-CREATE INDEX idx_parent_part_id ON story_parts USING hash(parent); -- This needs to be tested, to see if hashing has collisions
+CREATE INDEX IF NOT EXISTS idx_parent_part_id ON story_parts USING hash(parent); -- This needs to be tested, to see if hashing has collisions
 
-CREATE INDEX idx_story_points ON story_parts(points);
+CREATE INDEX IF NOT EXISTS idx_story_score ON story_parts(score);
 
 CREATE TABLE IF NOT EXISTS comments(
                                     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -51,6 +52,38 @@ CREATE TABLE IF NOT EXISTS comments(
                                     snippet UUID NOT NULL REFERENCES story_parts(id)
 );
 
-CREATE INDEX idx_comment_points ON comments(points);
+CREATE INDEX IF NOT EXISTS idx_comment_score ON comments(score);
 
--- TODO: Vote system, comments, caching, "place" system,
+CREATE TABLE IF NOT EXISTS snippet_votes (
+                       users Text NOT NULL REFERENCES users(username),
+                       snippet Uuid NOT NULL REFERENCES story_parts(id),
+                       vote_type smallint NOT NULL, -- 1 for upvote, -1 for downvote
+                       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                       CONSTRAINT pk_snipp_votes PRIMARY KEY (users, snippet)
+);
+
+CREATE OR REPLACE FUNCTION update_snippet_score()
+    RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        -- Increment or decrement the post score based on the type of vote
+        UPDATE story_parts
+        SET score = score + NEW.vote_type
+        WHERE id = NEW.snippet;
+    ELSIF TG_OP = 'DELETE' THEN
+        -- Reverse the increment or decrement on vote deletion
+        UPDATE story_parts
+        SET score = score - OLD.vote_type
+        WHERE id = OLD.snippet;
+    END IF;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_vote_operation
+    AFTER INSERT OR DELETE ON snippet_votes
+    FOR EACH ROW
+EXECUTE FUNCTION update_snippet_score();
+
+-- TODO: comments, caching, "place" system,
