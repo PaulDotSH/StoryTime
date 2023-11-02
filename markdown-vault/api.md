@@ -242,3 +242,12 @@ Status code 200
 OR
 Status code 500 (lack of permission or db error)
 ```
+### Remove snippet vote
+#### Endpoint:
+`DELETE` `/snippets/:id/vote`
+#### Output:
+```
+Status code 200
+OR
+Status code 500 (lack of permission, doesnt exist etc)
+```
