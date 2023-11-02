@@ -2,7 +2,7 @@ mod endpoints;
 pub mod error;
 pub mod user;
 
-use axum::routing::{get, post, put};
+use axum::routing::{delete, get, post, put};
 use axum::{middleware, Router};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres, query};
@@ -58,6 +58,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .route(
             "/snippets/:id/comments",
             get(endpoints::comments::get_story_comments),
+        )
+        .route(
+            "/snippets/:id/vote",
+            post(endpoints::story_snippet::vote_snippet),
+        )
+        .route(
+            "/snippets/:id/vote",
+            delete(endpoints::story_snippet::remove_vote),
         )
         .route(
             "/comments/:id",
