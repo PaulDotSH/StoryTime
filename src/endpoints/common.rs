@@ -5,6 +5,8 @@ use rand::{
     thread_rng,
 };
 
+pub static MAX_INDEX: i16 = 9;
+pub static MIN_INDEX: i16 = 2;
 pub static FORMAT: &str = "%Y-%m-%d %H:%M:%S%.f";
 pub fn generate_token(length: usize) -> String {
     Alphanumeric.sample_string(&mut thread_rng(), length)

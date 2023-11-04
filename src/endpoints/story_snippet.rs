@@ -1,11 +1,9 @@
-use crate::endpoints::common::{
-    generate_token, get_role_from_header, get_username_from_header, FORMAT,
-};
+use crate::endpoints::common::*;
 use crate::user::Role::User;
 use crate::{error::AppError, user::Role, AppState};
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
-use axum::http::{StatusCode, header, HeaderMap};
+use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::{extract::State, Json};
 use chrono::{Duration, NaiveDate, NaiveDateTime, Utc};
@@ -38,7 +36,7 @@ pub async fn new_story_snippet(
 
     let id: Uuid = query_scalar!(
         r#"
-        INSERT INTO story_parts(body, writer) VALUES ($1, $2) RETURNING id;
+        INSERT INTO story_parts(body, writer, child_cannon_time) VALUES ($1, $2, NOW() + INTERVAL '24 hours') RETURNING id;
         "#,
         payload.body,
         username
@@ -73,7 +71,7 @@ pub struct StorySnippet {
     body: String,
     created: NaiveDateTime,
     modified: Option<NaiveDateTime>,
-    child_cannon_time: NaiveDateTime,
+    child_cannon_time: Option<NaiveDateTime>,
     parent: Option<Uuid>,
     score: i32,
     is_final: bool,
@@ -125,11 +123,15 @@ pub enum Vote {
     Down = -1,
 }
 
-pub async fn vote_snippet(Path(id): Path<Uuid>, headers: HeaderMap, State(state): State<AppState>, Json(payload): Json<Vote>)
-    -> Result<StatusCode, AppError> {
+pub async fn vote_snippet(
+    Path(id): Path<Uuid>,
+    headers: HeaderMap,
+    State(state): State<AppState>,
+    Json(payload): Json<Vote>,
+) -> Result<StatusCode, AppError> {
     let role = get_role_from_header(&headers);
     if role < User {
-        return Err(AppError(anyhow!("You do not have permission")))
+        return Err(AppError(anyhow!("You do not have permission")));
     }
 
     let username = get_username_from_header(&headers); // This cannot fail since we set it in middleware
@@ -140,18 +142,20 @@ pub async fn vote_snippet(Path(id): Path<Uuid>, headers: HeaderMap, State(state)
         id,
         payload as i16
     )
-        .execute(&state.postgres)
-        .await?;
-
+    .execute(&state.postgres)
+    .await?;
 
     Ok(StatusCode::OK)
 }
 
-pub async fn remove_vote(Path(id): Path<Uuid>, headers: HeaderMap, State(state): State<AppState>)
-    -> Result<StatusCode, AppError> {
+pub async fn remove_vote(
+    Path(id): Path<Uuid>,
+    headers: HeaderMap,
+    State(state): State<AppState>,
+) -> Result<StatusCode, AppError> {
     let role = get_role_from_header(&headers);
     if role < User {
-        return Err(AppError(anyhow!("You do not have permission")))
+        return Err(AppError(anyhow!("You do not have permission")));
     }
 
     let username = get_username_from_header(&headers); // This cannot fail since we set it in middleware
@@ -161,8 +165,8 @@ pub async fn remove_vote(Path(id): Path<Uuid>, headers: HeaderMap, State(state):
         username,
         id
     )
-        .execute(&state.postgres)
-        .await?;
+    .execute(&state.postgres)
+    .await?;
 
     Ok(StatusCode::OK)
 }
@@ -170,8 +174,10 @@ pub async fn remove_vote(Path(id): Path<Uuid>, headers: HeaderMap, State(state):
 #[derive(Serialize, Deserialize)]
 pub struct PostStorySnippetContinuation {
     body: String,
+    is_final: bool
 }
 
+#[axum::debug_handler]
 pub async fn new_story_snippet_continuation(
     Path(parent): Path<Uuid>,
     State(state): State<AppState>,
@@ -185,15 +191,30 @@ pub async fn new_story_snippet_continuation(
         return Err(AppError(anyhow!("You do not have permission to post a story snippet, make sure you confirmed your email and are not banned!")));
     }
 
+    let parent_record = sqlx::query!(
+        r#"
+        SELECT index, is_final FROM story_parts WHERE id = $1;
+        "#,
+        parent
+    ).fetch_one(&state.postgres).await?;
+
+    if parent_record.is_final {
+        return Err(AppError(anyhow!("Parent is already final snippet.")));
+    }
+
+    let new_index = parent_record.index + 1;
+
     //TODO: When adding canonization, check if the snippet already has a cannon child
     //TODO: Let an user only add a continuation once
     let id: Uuid = query_scalar!(
         r#"
-        INSERT INTO story_parts(body, parent, writer) VALUES ($1, $2, $3) RETURNING id;
+        INSERT INTO story_parts(body, parent, writer, index, is_final) VALUES ($1, $2, $3, $4, $5) RETURNING id;
         "#,
         payload.body,
         parent,
-        username
+        username,
+        new_index,
+        if new_index == MAX_INDEX { true } else { if new_index < MIN_INDEX { false } else { payload.is_final } }
     )
     .fetch_one(&state.postgres)
     .await?;

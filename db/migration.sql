@@ -27,11 +27,12 @@ CREATE TABLE IF NOT EXISTS users (
                                                body Text NOT NULL,
                                                created Timestamp NOT NULL DEFAULT NOW(),
                                                modified Timestamp DEFAULT NULL,
-                                               child_cannon_time Timestamp NOT NULL DEFAULT NOW() + INTERVAL '24 hours', -- Null unless the story part is "cannon"
+                                               child_cannon_time Timestamp DEFAULT NULL, -- Null unless the story part is "cannon" -- NOW() + INTERVAL '24 hours'
                                                first UUID REFERENCES story_parts(id), -- optimization for going to the top, not sure if to keep or not
                                                parent UUID REFERENCES story_parts(id), -- used to search for "child" stories
                                                score Int NOT NULL DEFAULT 0, -- cache for upvote - downvote
                                                is_final bool NOT NULL DEFAULT FALSE,
+                                               index smallint NOT NULL DEFAULT 0,
                                                child UUID REFERENCES story_parts(id) -- update when a child becomes cannon
     );
 
@@ -85,5 +86,38 @@ CREATE TRIGGER after_vote_operation
     AFTER INSERT OR DELETE ON snippet_votes
     FOR EACH ROW
 EXECUTE FUNCTION update_snippet_score();
+
+-- "CANONIZATION QUERY"
+
+-- Call a stored procedure every 5 seconds
+
+
+CREATE OR REPLACE FUNCTION update_story_parts() RETURNS VOID AS $$
+BEGIN
+    WITH updated AS (
+        UPDATE story_parts p
+            SET child = c.id, child_cannon_time = NULL
+            FROM (
+                SELECT id, parent, score,
+                       ROW_NUMBER() OVER (PARTITION BY parent ORDER BY score DESC) AS rnk
+                FROM story_parts
+                WHERE parent IS NOT NULL
+            ) c
+            WHERE p.child_cannon_time IS NOT NULL
+                AND p.id = c.parent
+                AND p.child_cannon_time < NOW()
+                AND c.rnk = 1
+            RETURNING p.child
+    )
+    UPDATE story_parts
+    SET child_cannon_time = NOW() + interval '24 HOURS'
+    FROM updated
+    WHERE story_parts.id = updated.child;
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT cron.schedule('process-updates', '5 minutes', 'CALL update_story_parts()');
+
+-- TODO: Indexes for child_cannon_time, c.parent
 
 -- TODO: comments, caching, "place" system,
