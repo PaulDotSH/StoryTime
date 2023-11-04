@@ -19,7 +19,7 @@ pub struct PostComment {
     body: String,
 }
 
-pub async fn new_comment (
+pub async fn new_comment(
     Path(snippet_id): Path<Uuid>,
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -40,8 +40,8 @@ pub async fn new_comment (
         snippet_id,
         username
     )
-        .fetch_one(&state.postgres)
-        .await?;
+    .fetch_one(&state.postgres)
+    .await?;
 
     Ok(id.to_string().into_response())
 }
@@ -76,8 +76,8 @@ pub async fn edit_comment(
             id,
             username
         )
-            .execute(&state.postgres)
-            .await?;
+        .execute(&state.postgres)
+        .await?;
         if resp.rows_affected() == 0 {
             return Err(AppError(anyhow!(
                 "You do not have permission to edit this comment or it does not exist"
@@ -90,14 +90,12 @@ pub async fn edit_comment(
             Utc::now().naive_utc(),
             id
         )
-            .execute(&state.postgres)
-            .await?;
+        .execute(&state.postgres)
+        .await?;
     }
 
     Ok(())
 }
-
-
 
 #[derive(Deserialize)]
 pub struct CommentPagination {

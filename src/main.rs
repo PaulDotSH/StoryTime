@@ -5,7 +5,7 @@ pub mod user;
 use axum::routing::{delete, get, post, put};
 use axum::{middleware, Router};
 use sqlx::postgres::PgPoolOptions;
-use sqlx::{Pool, Postgres, query};
+use sqlx::{query, Pool, Postgres};
 use std::env;
 use std::error::Error;
 use std::net::SocketAddr;
@@ -67,10 +67,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "/snippets/:id/vote",
             delete(endpoints::story_snippet::remove_vote),
         )
-        .route(
-            "/comments/:id",
-            put(endpoints::comments::edit_comment),
-        )
+        .route("/comments/:id", put(endpoints::comments::edit_comment))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             endpoints::auth::auth_middleware,
