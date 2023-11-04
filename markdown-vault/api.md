@@ -54,12 +54,17 @@ SET AUTH COOKIE and Redirect to homepage
 #### Input:
 Type: `Json`
 ```
-body: string
+body: string,
+is_final: bool
 ```
+#### IMPORTANT!!
+If the new index is smaller than MIN_INDEX the variable is_final is set automatically to false, also if the new index is equals to MAX_INDEX the is_final is set automatically too
+
 Example:
 ```
 {
-    "body": "Test story body!!!"
+    "body": "Test story body!!!",
+    is_final: false
 }
 ```
 #### Output:
@@ -123,7 +128,7 @@ OR
     "body": "String",
     "created": "DateTime",
     "modified": "Optional<DateTime>",
-    "child_cannon_time": "DateTime",
+    "child_cannon_time": "Optional<DateTime>",
     "parent": "Optional<Uuid>",
     "child": "Optional<Uuid>",
     "score": "int"
@@ -150,7 +155,7 @@ OR
     "body": "String",
     "created": "DateTime",
     "modified": "Optional<DateTime>",
-    "child_cannon_time": "DateTime",
+    "child_cannon_time": "Optional<DateTime>",
     "parent": "Optional<Uuid>",
     "child": "Optional<Uuid>",
     "score": "Int"
@@ -158,6 +163,7 @@ OR
   ...
 ]
 ```
+If child_cannon_time isn't null, it means it's canon.
 ## Comments
 ### Post new comment
 #### Endpoint:
