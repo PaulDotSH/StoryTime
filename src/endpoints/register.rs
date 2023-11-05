@@ -1,5 +1,5 @@
 use crate::endpoints::common::generate_token;
-use crate::{error::AppError, user::Role, AppState};
+use crate::{error::AppError, user::Role, AppState, MAIL_CLIENT};
 use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHasher,
@@ -7,8 +7,8 @@ use argon2::{
 use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::{extract::State, Json};
-use rand::distributions::{Alphanumeric, DistString};
-use rand::thread_rng;
+use lettre::message::header::ContentType;
+use lettre::{AsyncTransport, Message};
 use serde::{Deserialize, Serialize};
 use sqlx::query;
 
@@ -20,7 +20,6 @@ pub struct CreateAccount {
 }
 
 //TODO: Regex email verification
-//TODO: Email verification
 //TODO: Login handler
 
 pub async fn register_handler(
