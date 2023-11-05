@@ -4,12 +4,31 @@ pub mod user;
 
 use axum::routing::{delete, get, post, put};
 use axum::{middleware, Router};
+use lazy_static::lazy_static;
+use lettre::message::header::ContentType;
+use lettre::transport::smtp::authentication::Credentials;
+use lettre::{AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{query, Pool, Postgres};
 use std::env;
 use std::error::Error;
 use std::net::SocketAddr;
+use tokio::sync::Mutex;
 use uuid::Uuid;
+
+lazy_static! {
+    pub static ref MAIL_CLIENT: AsyncSmtpTransport<Tokio1Executor> = {
+        let creds = Credentials::new(
+            env::var("SMTP_USER").unwrap(),
+            env::var("SMTP_PASS").unwrap(),
+        );
+
+        AsyncSmtpTransport::<Tokio1Executor>::relay(&env::var("SMTP_HOST").unwrap())
+            .unwrap()
+            .credentials(creds)
+            .build()
+    };
+}
 
 #[derive(Clone)]
 pub struct AppState {
@@ -74,6 +93,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         ))
         .route("/login", post(endpoints::login::login_handler))
         .route("/register", post(endpoints::register::register_handler))
+        .route("/confirm/:id", post(endpoints::email::confirm_email))
+        .route("/resend", post(endpoints::email::send_confirmation_email))
         .with_state(state)
         .route("/", get(sample_response_handler));
 
