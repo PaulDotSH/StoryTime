@@ -34,8 +34,9 @@ pub async fn confirm_email(
         Role::User as i16,
         result.email
     )
-        .execute(&state.postgres)
-        .await?;
+    .execute(&state.postgres)
+    .await?;
+
     Ok(StatusCode::OK)
 }
 
