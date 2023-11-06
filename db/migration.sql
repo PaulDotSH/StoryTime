@@ -130,5 +130,31 @@ CREATE INDEX IF NOT EXISTS idx_email_code ON email_confirmation using hash(code)
 CREATE INDEX IF NOT EXISTS idx_email_email ON email_confirmation using hash(email);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users using hash(email);
 
+CREATE TABLE IF NOT EXISTS notifications (
+                               id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+                               users Text NOT NULL references users(username),
+                               kind smallint NOT NULL,
+                               data JSONB NOT NULL,
+                               created TIMESTAMP NOT NULL DEFAULT NOW(),
+                               read BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE OR REPLACE FUNCTION delete_oldest_notification()
+    RETURNS TRIGGER AS $$
+BEGIN
+    IF (SELECT COUNT(*) FROM notifications) > 50 THEN
+        -- Delete the oldest notification based on the created timestamp
+        DELETE FROM notifications
+        WHERE id = (SELECT id FROM notifications ORDER BY created ASC LIMIT 1);
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_delete_oldest
+    AFTER INSERT ON notifications
+    FOR EACH ROW
+EXECUTE FUNCTION delete_oldest_notification();
 
 -- TODO: comments, caching, "place" system,

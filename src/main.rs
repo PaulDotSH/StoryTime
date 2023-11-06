@@ -87,6 +87,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
             delete(endpoints::story_snippet::remove_vote),
         )
         .route("/comments/:id", put(endpoints::comments::edit_comment))
+        .route(
+            "/notifications/:id/mark",
+            post(endpoints::notifications::mark_notification),
+        )
+        .route(
+            "/notifications/mark",
+            post(endpoints::notifications::mark_all_notifications),
+        )
+        .route(
+            "/notifications/",
+            get(endpoints::notifications::get_notifications),
+        )
         .layer(middleware::from_fn_with_state(
             state.clone(),
             endpoints::auth::auth_middleware,
