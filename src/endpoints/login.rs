@@ -11,6 +11,7 @@ use axum::{extract::State, Json};
 use chrono::{Duration, NaiveDate, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{query, query_scalar};
+use crate::endpoints::notifications::{create_notification, Kind};
 
 #[derive(Serialize, Deserialize)]
 pub struct Login {
@@ -57,6 +58,9 @@ pub async fn login_handler(
     )
     .execute(&state.postgres)
     .await?;
+
+    create_notification(&payload.username, &state.postgres, Kind::NewLogin, Default::default()).await?;
+
     let cookie = format!("TOKEN={}; Path=/; Max-Age=604800", &token);
 
     let mut headers = HeaderMap::new();
