@@ -287,3 +287,57 @@ Status code 500 (code expired or db error)
 OR
 Status code 200
 ```
+## Notifications
+### Get notifications
+#### Endpoint:
+`GET` `/notifications`
+#### Output:
+```
+Status code 500 (db error)
+```
+OR
+```json
+{
+    "id": "Uuid",
+    "kind": "NotificationKind",
+    "data": "JSON",
+    "created": "Timestamp",
+    "read": "bool"
+}
+```
+### Mark notification
+#### Endpoint:
+`POST` `/notifications/:id/mark`
+#### Input:
+Type: `json`
+```json
+true
+```
+OR
+```json
+false
+```
+#### Output:
+```
+Status code 500 (lack of permission or db error)
+OR
+200
+```
+### Mark all notifications
+#### Endpoint:
+`POST` `/notifications/mark`
+#### Input:
+Type: `json`
+```json
+true
+```
+OR
+```json
+false
+```
+#### Output:
+```
+Status code 500 (lack of permission or db error)
+OR
+200
+```
