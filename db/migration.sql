@@ -157,4 +157,5 @@ CREATE TRIGGER trigger_delete_oldest
     FOR EACH ROW
 EXECUTE FUNCTION delete_oldest_notification();
 
+
 -- TODO: comments, caching, "place" system,
