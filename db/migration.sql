@@ -118,6 +118,14 @@ $$ LANGUAGE plpgsql;
 
 SELECT cron.schedule('process-updates', '5 minutes', 'CALL update_story_parts()');
 
--- TODO: Indexes for child_cannon_time, c.parent
+-- TODO: Indexes for child_cannon_time, c.parent, comments, caching, "place" system,
 
--- TODO: comments, caching, "place" system,
+CREATE TABLE IF NOT EXISTS email_confirmation (
+                                            email Text NOT NULL REFERENCES users(email) PRIMARY KEY,
+                                             code Text NOT NULL,
+                                             expire Timestamp NOT NULL DEFAULT NOW() + INTERVAL '5 MINUTES'
+);
+
+CREATE INDEX IF NOT EXISTS idx_email_code ON email_confirmation using hash(code);
+CREATE INDEX IF NOT EXISTS idx_email_email ON email_confirmation using hash(email);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users using hash(email);

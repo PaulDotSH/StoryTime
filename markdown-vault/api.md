@@ -257,3 +257,33 @@ Status code 200
 OR
 Status code 500 (lack of permission, doesnt exist etc)
 ```
+## Email Verification
+### Send code verification
+#### Endpoint:
+`POST` `/resend`
+#### Input:
+Type: `Json`
+```
+email: string
+```
+Example:
+```
+{
+    "email": "test.name@gmail.com"
+}
+```
+#### Output:
+```
+Status code 500 (email doesnt exist or db error)
+OR
+Status code 200
+```
+### Verify account
+#### Endpoint:
+`POST` `/confirm/:code`
+#### Output:
+```
+Status code 500 (code expired or db error)
+OR
+Status code 200
+```

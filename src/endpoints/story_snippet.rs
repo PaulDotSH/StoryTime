@@ -174,7 +174,7 @@ pub async fn remove_vote(
 #[derive(Serialize, Deserialize)]
 pub struct PostStorySnippetContinuation {
     body: String,
-    is_final: bool
+    is_final: bool,
 }
 
 #[axum::debug_handler]
@@ -196,7 +196,9 @@ pub async fn new_story_snippet_continuation(
         SELECT index, is_final FROM story_parts WHERE id = $1;
         "#,
         parent
-    ).fetch_one(&state.postgres).await?;
+    )
+    .fetch_one(&state.postgres)
+    .await?;
 
     if parent_record.is_final {
         return Err(AppError(anyhow!("Parent is already final snippet.")));
