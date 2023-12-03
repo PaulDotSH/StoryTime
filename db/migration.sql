@@ -21,6 +21,13 @@ CREATE TABLE IF NOT EXISTS users (
                                      score int NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS places (
+                                      name Text NOT NULL PRIMARY KEY,
+                                      description Text NOT NULL,
+                                      rules Text NOT NULL,
+                                      owner Text NOT NULL references users(username)
+);
+
     CREATE TABLE IF NOT EXISTS story_parts (
                                                id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
                                                writer Text NOT NULL REFERENCES users(username),
@@ -33,6 +40,7 @@ CREATE TABLE IF NOT EXISTS users (
                                                score Int NOT NULL DEFAULT 0, -- cache for upvote - downvote
                                                is_final bool NOT NULL DEFAULT FALSE,
                                                index smallint NOT NULL DEFAULT 0,
+                                               place Text NOT NULL references places(name),
                                                child UUID REFERENCES story_parts(id) -- update when a child becomes cannon
     );
 
@@ -158,5 +166,13 @@ CREATE TRIGGER trigger_delete_oldest
     FOR EACH ROW
 EXECUTE FUNCTION delete_oldest_notification();
 
-
--- TODO: comments, caching, "place" system,
+-- Maybe enable and think these through in the future...
+-- CREATE TABLE IF NOT EXISTS places_tags (
+--                                       name Text NOT NULL PRIMARY KEY,
+--                                       place Text NOT NULL references places(name)
+-- );
+--
+-- CREATE TABLE IF NOT EXISTS tags_snippets (
+--                                            tag Text NOT NULL references places_tags(name),
+--                                            snippet Uuid NOT NULL references story_parts(id)
+-- );
