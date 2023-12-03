@@ -13,6 +13,7 @@ use sqlx::{query, Pool, Postgres};
 use std::env;
 use std::error::Error;
 use std::net::SocketAddr;
+use tokio::net::TcpListener;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -79,6 +80,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             get(endpoints::comments::get_story_comments),
         )
         .route(
+            "/places/new",
+            post(endpoints::place::new_place),
+        )
+        .route(
             "/snippets/:id/vote",
             post(endpoints::story_snippet::vote_snippet),
         )
@@ -101,7 +106,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .layer(middleware::from_fn_with_state(
             state.clone(),
-            endpoints::auth::auth_middleware,
+            endpoints::auth::auth_middleware::<axum::body::Body>,
         ))
         .route("/login", post(endpoints::login::login_handler))
         .route("/register", post(endpoints::register::register_handler))
@@ -110,10 +115,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .with_state(state)
         .route("/", get(sample_response_handler));
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 5431));
+    let listener = TcpListener::bind("127.0.0.1:5431").await.expect("Cannot start server");
     println!("Storytime backend running.");
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
 

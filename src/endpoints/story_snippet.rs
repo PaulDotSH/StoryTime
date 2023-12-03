@@ -8,7 +8,6 @@ use axum::response::{IntoResponse, Redirect, Response};
 use axum::{extract::State, Json};
 use chrono::{Duration, NaiveDate, NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::{query, query_as, query_scalar};
 use uuid::Uuid;
 

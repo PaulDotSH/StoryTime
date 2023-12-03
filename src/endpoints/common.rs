@@ -8,6 +8,7 @@ use rand::{
 pub static MAX_INDEX: i16 = 9;
 pub static MIN_INDEX: i16 = 2;
 pub static FORMAT: &str = "%Y-%m-%d %H:%M:%S%.f";
+pub static MIN_PLACE_CREATION_SCORE: i32 = 10_000;
 pub fn generate_token(length: usize) -> String {
     Alphanumeric.sample_string(&mut thread_rng(), length)
 }
