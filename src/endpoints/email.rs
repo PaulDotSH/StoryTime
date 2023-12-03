@@ -4,7 +4,7 @@ use anyhow::anyhow;
 use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::{extract::State, Json};
-use chrono::Utc;
+use chrono::{Duration, Utc};
 use lettre::message::header::ContentType;
 use lettre::{AsyncTransport, Message};
 use serde::{Deserialize, Serialize};
@@ -23,7 +23,7 @@ pub async fn confirm_email(
     .fetch_one(&state.postgres)
     .await?; // TODO: Better error message when code doesnt exist
 
-    if result.expire > Utc::now().naive_utc() {
+    if result.expire < Utc::now().naive_utc() {
         return Err(AppError(anyhow!("Code expired")));
     }
 
@@ -76,7 +76,7 @@ pub async fn send_confirmation_email(
                 UPDATE email_confirmation SET code = $1, expire = $2 WHERE email = $3
                 "#,
                 &code,
-                Utc::now().naive_utc(),
+                (Utc::now() + Duration::minutes(5)).naive_utc(),
                 payload.email,
             )
             .execute(&state.postgres)
