@@ -1,6 +1,3 @@
-
-use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Postgres, query_as};
 use crate::endpoints::common::{generate_token, get_username_from_header};
 use crate::{error::AppError, user::Role, AppState, MAIL_CLIENT};
 use anyhow::anyhow;
@@ -8,7 +5,9 @@ use axum::extract::Path;
 use axum::http::{HeaderMap, StatusCode};
 use axum::{extract::State, Json};
 use chrono::{NaiveDateTime, Utc};
+use serde::{Deserialize, Serialize};
 use sqlx::query;
+use sqlx::{query_as, Pool, Postgres};
 use uuid::Uuid;
 
 #[repr(i16)]
@@ -32,18 +31,23 @@ impl From<i16> for Kind {
 }
 
 //TODO: Keep at most 50 notifications per user
-pub async fn create_notification(user: &str, db: &Pool<Postgres>, kind: Kind, data: serde_json::Value) -> Result<(), AppError> {
-        query!(
-            r#"
+pub async fn create_notification(
+    user: &str,
+    db: &Pool<Postgres>,
+    kind: Kind,
+    data: serde_json::Value,
+) -> Result<(), AppError> {
+    query!(
+        r#"
                 INSERT INTO notifications (users, kind, data)
                 VALUES ($1, $2, $3)
                 "#,
-            user,
-            kind as i16,
-            data
-        )
-        .execute(db)
-        .await?;
+        user,
+        kind as i16,
+        data
+    )
+    .execute(db)
+    .await?;
 
     Ok(())
 }
@@ -64,8 +68,8 @@ pub async fn mark_notification(
         id,
         username
     )
-        .execute(&state.postgres)
-        .await?;
+    .execute(&state.postgres)
+    .await?;
 
     Ok(StatusCode::OK)
 }
@@ -84,8 +88,8 @@ pub async fn mark_all_notifications(
         payload,
         username
     )
-        .execute(&state.postgres)
-        .await?;
+    .execute(&state.postgres)
+    .await?;
 
     Ok(StatusCode::OK)
 }
@@ -96,7 +100,7 @@ pub struct Notification {
     kind: Kind,
     data: serde_json::Value,
     created: NaiveDateTime,
-    read: bool
+    read: bool,
 }
 
 //TODO: Maybe add pagination based on timestamp?
