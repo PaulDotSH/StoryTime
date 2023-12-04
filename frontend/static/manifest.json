@@ -1,0 +1,14 @@
+{
+	"background_color": "#000000",
+	"theme_color": "#5cb85c",
+	"name": "StoryTime",
+	"display": "minimal-ui",
+	"start_url": "/",
+	"icons": [
+		{
+			"src": "logo.png",
+			"sizes": "256x256",
+			"type": "image/png"
+		}
+	]
+}
