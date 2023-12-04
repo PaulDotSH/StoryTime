@@ -1,59 +1,70 @@
 <script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+	import { page } from '$app/stores';
+	import Pagination from './Pagination.svelte';
+
+	/** @type {import('./$types').PageData} */
+	export let data;
+
+	$: p = +($page.url.searchParams.get('page') ?? '1');
+	$: tag = $page.url.searchParams.get('tag');
+	$: tab = $page.url.searchParams.get('tab') ?? 'all';
+	$: page_link_base = tag ? `tag=${tag}` : `tab=${tab}`;
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>StoryTime</title>
 </svelte:head>
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
+<div class="home-page">
+	{#if !data.user}
+		<div class="banner">
+			<div class="container">
+				<h1 class="logo-font">StoryTime</h1>
+				<p>A place for storytelling.</p>
+			</div>
+		</div>
+	{/if}
 
-		to your new<br />SvelteKit app
-	</h1>
+	<div class="container page">
+		<div class="row">
+			<div class="col-md-9">
+				<div class="feed-toggle">
+					<ul class="nav nav-pills outline-active">
+						<li class="nav-item">
+							<a href="/?tab=all" class="nav-link" class:active={tab === 'all' && !tag}>
+								Global Feed
+							</a>
+						</li>
 
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
+						{#if data.user}
+							<li class="nav-item">
+								<a href="/?tab=feed" class="nav-link" class:active={tab === 'feed'}>Your Feed</a>
+							</li>
+						{:else}
+							<li class="nav-item">
+								<a href="/login" class="nav-link">Sign in to see your Feed</a>
+							</li>
+						{/if}
 
-	<Counter />
-</section>
+						{#if tag}
+							<li class="nav-item">
+								<a href="/?tag={tag}" class="nav-link active">
+									<i class="ion-pound" />
+									{tag}
+								</a>
+							</li>
+						{/if}
+					</ul>
+				</div>
+			</div>
 
-<style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
-
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
-</style>
+			<div class="col-md-3">
+				<div class="sidebar">
+					<p>Popular Tags</p>
+					<div class="tag-list">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
