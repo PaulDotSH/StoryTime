@@ -341,3 +341,51 @@ Status code 500 (lack of permission or db error)
 OR
 200
 ```
+## Profile Badges
+### Get profile badges available for sale
+#### Endpoint:
+`GET` `/shop/badges`
+#### Output:
+```
+Status code 500 (db error)
+```
+OR
+```json
+{
+    "id": "i32",
+    "image": "String",
+    "descr": "String",
+    "color": "String (Hex format)",
+    "price": "i32"
+}
+```
+### Get user's profile badges
+#### Endpoint:
+`GET` `/profile/:username/badges`
+#### Output:
+```
+Status code 500 (db error)
+```
+OR
+```json
+{
+    "id": "i32",
+    "image": "String",
+    "descr": "String",
+    "color": "String (Hex format)",
+    "earned_at": "Timestamp"
+}
+```
+### Buy a badge
+#### Endpoint:
+`POST` `/shop/badges/:id/buy`
+#### Output:
+```
+Status code 500 (db error)
+OR
+Status code 500 with message "You do not have enough PlotPoints to purchase this badge"
+```
+OR
+```
+Status code 200
+```

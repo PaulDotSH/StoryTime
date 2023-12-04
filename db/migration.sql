@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS users (
                                      pw_changed Timestamp NOT NULL DEFAULT NOW(),
                                      token Text UNIQUE,
                                      tok_expire Timestamp NOT NULL DEFAULT NOW() + INTERVAL '7 days',
-                                     score int NOT NULL DEFAULT 0
+                                     score int NOT NULL DEFAULT 0,
+                                     pp int NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS places (
@@ -127,11 +128,11 @@ $$ LANGUAGE plpgsql;
 SELECT cron.schedule('process-updates', '5 minutes', 'CALL update_story_parts()');
 
 -- TODO: Indexes for child_cannon_time, c.parent, comments, caching, "place" system,
-
+-- TODO: Indexes for search system
 CREATE TABLE IF NOT EXISTS email_confirmation (
                                             email Text NOT NULL REFERENCES users(email) PRIMARY KEY,
-                                             code Text NOT NULL,
-                                             expire Timestamp NOT NULL DEFAULT NOW() + INTERVAL '5 MINUTES'
+                                            code Text NOT NULL,
+                                            expire Timestamp NOT NULL DEFAULT NOW() + INTERVAL '5 MINUTES'
 );
 
 CREATE INDEX IF NOT EXISTS idx_email_code ON email_confirmation using hash(code);
@@ -176,3 +177,22 @@ EXECUTE FUNCTION delete_oldest_notification();
 --                                            tag Text NOT NULL references places_tags(name),
 --                                            snippet Uuid NOT NULL references story_parts(id)
 -- );
+
+CREATE TABLE IF NOT EXISTS profile_badges(
+    id serial NOT NULL PRIMARY KEY,
+    image Text NOT NULL,
+    descr Text NOT NULL,
+    color VARCHAR(7) NOT NULL -- Hex code of the color
+);
+
+CREATE TABLE IF NOT EXISTS profile_badges_link(
+                                                  id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+                                                  users Text NOT NULL REFERENCES users(username),
+                                                  award Serial NOT NULL REFERENCES profile_badges(id),
+                                                  earned_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS profile_badges_shop(
+                                                award serial NOT NULL REFERENCES profile_badges(id) PRIMARY KEY,
+                                                price int NOT NULL
+)

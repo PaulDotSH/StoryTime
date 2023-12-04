@@ -79,10 +79,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "/snippets/:id/comments",
             get(endpoints::comments::get_story_comments),
         )
-        .route(
-            "/places/new",
-            post(endpoints::place::new_place),
-        )
+        .route("/places/new", post(endpoints::place::new_place))
         .route(
             "/snippets/:id/vote",
             post(endpoints::story_snippet::vote_snippet),
@@ -104,6 +101,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "/notifications/",
             get(endpoints::notifications::get_notifications),
         )
+        .route("/shop/badges/:id/buy", post(endpoints::profile_badges::buy_badge))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             endpoints::auth::auth_middleware::<axum::body::Body>,
@@ -112,10 +110,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .route("/register", post(endpoints::register::register_handler))
         .route("/confirm/:id", post(endpoints::email::confirm_email))
         .route("/resend", post(endpoints::email::send_confirmation_email))
+        .route(
+            "/profile/:id/badges",
+            get(endpoints::profile_badges::get_user_badges),
+        )
+        .route(
+            "/shop/badges",
+            get(endpoints::profile_badges::get_shop_badges),
+        )
         .with_state(state)
         .route("/", get(sample_response_handler));
 
-    let listener = TcpListener::bind("127.0.0.1:5431").await.expect("Cannot start server");
+    let listener = TcpListener::bind("127.0.0.1:5431")
+        .await
+        .expect("Cannot start server");
     println!("Storytime backend running.");
     axum::serve(listener, app.into_make_service())
         .await
