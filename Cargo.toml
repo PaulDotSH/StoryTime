@@ -16,7 +16,7 @@ serde = { version = "1.0.193", features = ["derive"] }
 serde_json = "1.0.108"
 sqlx = { version = "0.7.3", features = ["sqlx-postgres", "runtime-tokio", "uuid", "time", "postgres", "chrono"] }
 tokio = { version = "1.34.0", features = ["full"] }
-tower-http = { version = "0.5.0", features = ["uuid", "cors", "tokio"] }
+tower-http = { version = "0.5.0", features = ["uuid", "cors", "tokio", "fs"] }
 uuid = { version = "1.6.1", features = ["zerocopy", "v4", "serde"] }
 axum-macros = "0.4.0"
 lazy_static = { version = "1.4.0", features = [] }
