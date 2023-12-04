@@ -1,10 +1,10 @@
 use crate::{user::Role, AppState};
+use axum::body::Body;
 use axum::extract::State;
 use axum::http::{HeaderValue, Request, StatusCode};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use chrono::Utc;
-use axum::body::Body;
 
 #[derive(sqlx::FromRow, Debug)]
 struct User {
@@ -17,7 +17,7 @@ struct User {
 pub async fn auth_middleware<B>(
     State(state): State<AppState>,
     mut request: Request<Body>, // insert the username and role headers in the following requests in case they are needed so we don't hit the database again
-    next: Next,           // So we can forward the request
+    next: Next,                 // So we can forward the request
 ) -> Response {
     let headers = request.headers_mut();
 

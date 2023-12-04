@@ -16,7 +16,7 @@ use uuid::Uuid;
 pub struct NewPlace {
     name: String,
     description: String,
-    rules: String
+    rules: String,
 }
 
 #[axum::debug_handler]
@@ -39,11 +39,13 @@ pub async fn new_place(
         "#,
         username
     )
-        .fetch_one(&state.postgres)
-        .await?;
+    .fetch_one(&state.postgres)
+    .await?;
 
     if score < MIN_PLACE_CREATION_SCORE {
-        return Err(AppError(anyhow!("You don't have enough score to create a place")));
+        return Err(AppError(anyhow!(
+            "You don't have enough score to create a place"
+        )));
     }
 
     query!(
@@ -53,9 +55,8 @@ pub async fn new_place(
         payload.rules,
         username
     )
-        .execute(&state.postgres)
-        .await?;
-
+    .execute(&state.postgres)
+    .await?;
 
     Ok(StatusCode::OK)
 }
