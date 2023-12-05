@@ -194,7 +194,7 @@ pub async fn new_story_snippet_continuation(
 
     let parent_record = sqlx::query!(
         r#"
-        SELECT index, is_final FROM story_parts WHERE id = $1;
+        SELECT index, is_final, place FROM story_parts WHERE id = $1;
         "#,
         parent
     )
@@ -211,13 +211,14 @@ pub async fn new_story_snippet_continuation(
     //TODO: Let an user only add a continuation once
     let id: Uuid = query_scalar!(
         r#"
-        INSERT INTO story_parts(body, parent, writer, index, is_final) VALUES ($1, $2, $3, $4, $5) RETURNING id;
+        INSERT INTO story_parts(body, parent, writer, index, is_final, place) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;
         "#,
         payload.body,
         parent,
         username,
         new_index,
-        if new_index == MAX_INDEX { true } else { if new_index < MIN_INDEX { false } else { payload.is_final } }
+        if new_index == MAX_INDEX { true } else { if new_index < MIN_INDEX { false } else { payload.is_final } },
+        parent_record.place
     )
     .fetch_one(&state.postgres)
     .await?;
