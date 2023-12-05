@@ -54,7 +54,7 @@ CREATE INDEX IF NOT EXISTS idx_story_score ON story_parts(score);
 
 CREATE TABLE IF NOT EXISTS comments(
                                     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-                                    writer Text NOT NULL,
+                                    writer Text NOT NULL references users(username),
                                     body Text NOT NULL,
                                     created Timestamp NOT NULL DEFAULT NOW(),
                                     modified Timestamp DEFAULT NULL,
@@ -219,3 +219,7 @@ INSERT INTO profile_badges_shop (award, price, descr) VALUES
     (6, 542, ''),
     (7, 221, ''),
     (8, 777, '');
+
+INSERT INTO places (name, description, rules, owner) VALUES
+                                                         ('fantasy', 'The place of wonder, magic and interesting creatures', 'Follow ST''s TOS', 'Admin');
+

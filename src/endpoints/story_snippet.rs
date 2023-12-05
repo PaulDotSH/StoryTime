@@ -14,6 +14,7 @@ use uuid::Uuid;
 #[derive(Serialize, Deserialize)]
 pub struct PostStorySnippet {
     body: String,
+    place: String
 }
 
 //TODO: Make a way to continue a story snippet
@@ -35,10 +36,11 @@ pub async fn new_story_snippet(
 
     let id: Uuid = query_scalar!(
         r#"
-        INSERT INTO story_parts(body, writer, child_cannon_time) VALUES ($1, $2, NOW() + INTERVAL '24 hours') RETURNING id;
+        INSERT INTO story_parts(body, writer, child_cannon_time, place) VALUES ($1, $2, NOW() + INTERVAL '24 hours', $3) RETURNING id;
         "#,
         payload.body,
-        username
+        username,
+        payload.place
     )
     .fetch_one(&state.postgres)
     .await?;
