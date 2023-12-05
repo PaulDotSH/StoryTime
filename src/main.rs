@@ -110,8 +110,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .route("/confirm/:id", post(endpoints::email::confirm_email))
         .route("/resend", post(endpoints::email::send_confirmation_email))
         .route(
-            "/profile/:id/badges",
+            "/profile/:username/badges",
             get(endpoints::profile_badges::get_user_badges),
+        )
+        .route(
+            "/profile/:username",
+            get(endpoints::profile::get_user_profile)
         )
         .route(
             "/shop/badges",
