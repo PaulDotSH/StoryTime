@@ -12,19 +12,19 @@
 
 			{#if $page.data.user}
 				<li class="nav-item">
-					<a href="/editor" class="nav-link" class:active={$page.url.pathname === '/editor'}>
+					<a href="/snippet" class="nav-link" class:active={$page.url.pathname === '/snippet'}>
 						<i class="ion-compose" />&nbsp;New Story
 					</a>
 				</li>
 
 				<li class="nav-item">
-					<a href="/settings" class="nav-link" class:active={$page.url.pathname === '/settings'}>
-						<i class="ion-gear-a" />&nbsp;Settings
+					<a href="/profile/settings" class="nav-link" class:active={$page.url.pathname === '/settings'}>
+						<i class="ion-gear-a" />&nbsp; Profile settings
 					</a>
 				</li>
 
 				<li class="nav-item">
-					<a href="/profile/@{$page.data.user.username}" class="nav-link">
+					<a href="/profile/{$page.data.user.username}" class="nav-link">
 						{$page.data.user.username}
 					</a>
 				</li>
