@@ -4,3 +4,4 @@
 /.netlify
 /.svelte-kit
 /.vercel_build_output
+/package-lock.json
