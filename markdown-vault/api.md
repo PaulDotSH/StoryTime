@@ -353,8 +353,10 @@ OR
 ```json
 {
     "id": "i32",
+    "name": "String",
     "image": "String",
     "descr": "String",
+    "shop_descr": "String",
     "color": "String (Hex format)",
     "price": "i32"
 }
@@ -370,6 +372,7 @@ OR
 ```json
 {
     "id": "i32",
+    "name": "String",
     "image": "String",
     "descr": "String",
     "color": "String (Hex format)",
