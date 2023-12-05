@@ -180,6 +180,7 @@ EXECUTE FUNCTION delete_oldest_notification();
 
 CREATE TABLE IF NOT EXISTS profile_badges(
     id serial NOT NULL PRIMARY KEY,
+    name Text NOT NULL,
     image Text NOT NULL,
     descr Text NOT NULL,
     color VARCHAR(7) NOT NULL -- Hex code of the color
@@ -194,5 +195,27 @@ CREATE TABLE IF NOT EXISTS profile_badges_link(
 
 CREATE TABLE IF NOT EXISTS profile_badges_shop(
                                                 award serial NOT NULL REFERENCES profile_badges(id) PRIMARY KEY,
-                                                price int NOT NULL
-)
+                                                price int NOT NULL,
+                                                descr Text NOT NULL
+);
+
+-- Insert badges from assets/badges/
+INSERT INTO profile_badges (id, name, image, descr, color) VALUES
+                                                     (1, 'Apple branch', 'apple-branch.svg', 'Bathed in the gentle hues of twilight, a solitary apple dangles from a timeworn branch.', '#C72E2D'),
+                                                     (2, 'Caffeine Connoisseur', 'coffee.svg', 'The elixir of productivity', '#6F4E37'),
+                                                     (3, 'Diamond', 'diamond.svg', 'The diamond represents wealth, true wealth is refined through time, pressure and hard work.', '#33B1B5'),
+                                                     (4, 'Christmas tree', 'christmas-tree.svg', 'For true lovers of christmas.', '#1DCF43'),
+                                                     (5, 'Queen', 'crown.svg', 'This story-writer is not just a normal person, she is a QUEEN.', '#CFA81D'),
+                                                     (6, 'Flower', 'flower.svg', 'The flower often symbolizes beauty, nature and calmness.', '#C90000'),
+                                                     (7, 'Magnifying Glass', 'magnifying-glass.svg', 'People fascinated by mystery and puzzles.', '#1DCF43'),
+                                                     (8, 'Master wizard hat', 'wizard-hat.svg', 'A hat woven with celestial symbols, hinting at the enchanting world of a young sorcerer''s magical journey.', '#A15727');
+
+INSERT INTO profile_badges_shop (award, price, descr) VALUES
+    (1, 513, ''),
+    (2, 500, ''),
+    (3, 5000, ''),
+    (4, 500, ''),
+    (5, 512, ''),
+    (6, 542, ''),
+    (7, 221, ''),
+    (8, 777, '');

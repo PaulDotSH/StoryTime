@@ -16,10 +16,12 @@ use sqlx::{query, query_as, query_scalar};
 #[derive(sqlx::FromRow, Debug, Serialize)]
 pub struct ShopBadge {
     id: i32,
+    name: String,
     image: String,
     descr: String,
     color: String,
     price: i32,
+    shop_descr: String,
 }
 
 pub async fn buy_badge(
@@ -72,7 +74,7 @@ pub async fn get_shop_badges(
     let badges = query_as!(
         ShopBadge,
         r#"
-        SELECT pb.*, pbs.price
+        SELECT pb.*, pbs.price, pbs.descr as shop_descr
         FROM profile_badges pb
         JOIN profile_badges_shop pbs ON pb.id = pbs.award
         "#
@@ -86,6 +88,7 @@ pub async fn get_shop_badges(
 #[derive(sqlx::FromRow, Debug, Serialize)]
 pub struct ProfileBadge {
     id: i32,
+    name: String,
     image: String,
     descr: String,
     color: String,
