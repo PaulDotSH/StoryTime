@@ -341,7 +341,7 @@ Status code 500 (lack of permission or db error)
 OR
 200
 ```
-## Profile Badges
+## Badges
 ### Get profile badges available for sale
 #### Endpoint:
 `GET` `/shop/badges`
@@ -361,6 +361,20 @@ OR
     "price": "i32"
 }
 ```
+### Buy a badge
+#### Endpoint:
+`POST` `/shop/badges/:id/buy`
+#### Output:
+```
+Status code 500 (db error)
+OR
+Status code 500 with message "You do not have enough PlotPoints to purchase this badge"
+```
+OR
+```
+Status code 200
+```
+## Profile
 ### Get user's profile badges
 #### Endpoint:
 `GET` `/profile/:username/badges`
@@ -379,16 +393,39 @@ OR
     "earned_at": "Timestamp"
 }
 ```
-### Buy a badge
+### Get user's profile
 #### Endpoint:
-`POST` `/shop/badges/:id/buy`
+`GET` `/profile/:username`
 #### Output:
 ```
 Status code 500 (db error)
-OR
-Status code 500 with message "You do not have enough PlotPoints to purchase this badge"
 ```
 OR
-```
-Status code 200
+```json
+{
+  "perm": "Role",
+  "score": "i32",
+  "comments": [
+    {
+      "id": "Uuid",
+      "body": "String",
+      "created": "Timestamp",
+      "modified": "Option<Timestamp>",
+      "score": "i32",
+      "snippet": "Uuid"
+    }
+  ],
+  "snippets": [
+    {
+      "id": "Uuid",
+      "body": "String",
+      "created": "Timestamp",
+      "modified": "Option<Timestamp>",
+      "is_final": "bool",
+      "score": "i32",
+      "parent": "Option<Uuid>",
+      "place": "String"
+    }
+  ]
+}
 ```

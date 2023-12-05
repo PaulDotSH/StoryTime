@@ -8,3 +8,4 @@ pub mod place;
 pub mod profile_badges;
 pub mod register;
 pub mod story_snippet;
+pub(crate) mod profile;
