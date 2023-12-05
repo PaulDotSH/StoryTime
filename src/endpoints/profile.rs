@@ -1,23 +1,17 @@
-use crate::endpoints::common::*;
-use crate::user::Role::User;
 use crate::{error::AppError, user::Role, AppState};
-use anyhow::anyhow;
-use axum::extract::{Path, Query};
-use axum::http::{header, HeaderMap, StatusCode};
-use axum::response::{IntoResponse, Redirect, Response};
+use axum::extract::Path;
 use axum::{extract::State, Json};
-use chrono::{Duration, NaiveDate, NaiveDateTime, Utc};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
-use sqlx::{query, query_as, query_scalar};
+use sqlx::{query, query_as};
 use uuid::Uuid;
-use crate::endpoints::story_snippet::PostStorySnippet;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserProfile {
     perm: Role,
     score: i32,
     comments: Vec<UserProfileComment>,
-    snippets: Vec<UserProfileSnippet>
+    snippets: Vec<UserProfileSnippet>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -42,18 +36,18 @@ pub struct UserProfileSnippet {
     place: String,
 }
 
-
 pub async fn get_user_profile(
     Path(username): Path<String>,
     State(state): State<AppState>,
-    headers: HeaderMap,
 ) -> Result<Json<UserProfile>, AppError> {
     let user_row = query!(
         r#"
         SELECT perm, score FROM users WHERE username = $1;
         "#,
         username,
-    ).fetch_one(&state.postgres).await?;
+    )
+    .fetch_one(&state.postgres)
+    .await?;
 
     let comments = query_as!(
         UserProfileComment,

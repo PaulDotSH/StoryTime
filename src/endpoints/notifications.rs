@@ -1,10 +1,9 @@
-use crate::endpoints::common::{generate_token, get_username_from_header};
-use crate::{error::AppError, user::Role, AppState, MAIL_CLIENT};
-use anyhow::anyhow;
+use crate::endpoints::common::get_username_from_header;
+use crate::{error::AppError, AppState};
 use axum::extract::Path;
 use axum::http::{HeaderMap, StatusCode};
 use axum::{extract::State, Json};
-use chrono::{NaiveDateTime, Utc};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::query;
 use sqlx::{query_as, Pool, Postgres};
