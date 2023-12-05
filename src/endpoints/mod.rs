@@ -5,7 +5,7 @@ pub mod email;
 pub mod login;
 pub mod notifications;
 pub mod place;
+pub(crate) mod profile;
 pub mod profile_badges;
 pub mod register;
 pub mod story_snippet;
-pub(crate) mod profile;

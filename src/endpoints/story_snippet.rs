@@ -1,20 +1,20 @@
 use crate::endpoints::common::*;
 use crate::user::Role::User;
-use crate::{error::AppError, user::Role, AppState};
+use crate::{error::AppError, AppState};
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
-use axum::http::{header, HeaderMap, StatusCode};
-use axum::response::{IntoResponse, Redirect, Response};
+use axum::http::{HeaderMap, StatusCode};
+use axum::response::{IntoResponse, Response};
 use axum::{extract::State, Json};
-use chrono::{Duration, NaiveDate, NaiveDateTime, Utc};
+use chrono::{NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{query, query_as, query_scalar};
+use sqlx::{query_as, query_scalar};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize)]
 pub struct PostStorySnippet {
     body: String,
-    place: String
+    place: String,
 }
 
 //TODO: Make a way to continue a story snippet
@@ -137,7 +137,7 @@ pub async fn vote_snippet(
 
     let username = get_username_from_header(&headers); // This cannot fail since we set it in middleware
 
-    let result = sqlx::query!(
+    sqlx::query!(
         "INSERT INTO snippet_votes (users, snippet, vote_type) VALUES ($1, $2, $3)",
         username,
         id,
@@ -161,7 +161,7 @@ pub async fn remove_vote(
 
     let username = get_username_from_header(&headers); // This cannot fail since we set it in middleware
 
-    let result = sqlx::query!(
+    sqlx::query!(
         "DELETE FROM snippet_votes WHERE users = $1 AND snippet = $2",
         username,
         id

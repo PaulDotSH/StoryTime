@@ -1,17 +1,14 @@
-use crate::endpoints::common::{generate_token, FORMAT};
+use crate::endpoints::common::generate_token;
 use crate::endpoints::notifications::{create_notification, Kind};
-use crate::{error::AppError, user::Role, AppState};
+use crate::{error::AppError, AppState};
 use anyhow::anyhow;
-use argon2::{
-    password_hash::{rand_core::OsRng, SaltString},
-    Argon2, PasswordHash, PasswordHasher, PasswordVerifier,
-};
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use axum::http::{header, HeaderMap};
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::{extract::State, Json};
-use chrono::{Duration, NaiveDate, NaiveDateTime, Utc};
+use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{query, query_scalar};
+use sqlx::query_scalar;
 
 #[derive(Serialize, Deserialize)]
 pub struct Login {
