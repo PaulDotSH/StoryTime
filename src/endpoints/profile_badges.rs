@@ -1,14 +1,12 @@
 use crate::endpoints::common::*;
-use crate::user::Role::User;
-use crate::{error::AppError, user::Role, AppState};
+use crate::{error::AppError, AppState};
 use anyhow::anyhow;
-use axum::extract::{Path, Query};
-use axum::http::{header, HeaderMap, StatusCode};
-use axum::response::{IntoResponse, Redirect, Response};
+use axum::extract::Path;
+use axum::http::HeaderMap;
 use axum::{extract::State, Json};
-use chrono::{Duration, NaiveDate, NaiveDateTime, Utc};
-use serde::{Deserialize, Serialize};
-use sqlx::{query, query_as, query_scalar};
+use chrono::NaiveDateTime;
+use serde::Serialize;
+use sqlx::query_as;
 
 //TODO: Add profile badge endpoint, also let the user upload the badge photo.
 //If needed add an endpoint to get the price of a specific award
@@ -47,24 +45,26 @@ pub async fn buy_badge(
     .fetch_one(&state.postgres)
     .await?;
     if user_pp < price {
-        return Err(AppError(anyhow!("You do not have enough PlotPoints to purchase this badge")));
+        return Err(AppError(anyhow!(
+            "You do not have enough PlotPoints to purchase this badge"
+        )));
     }
 
     sqlx::query!(
-            "UPDATE users SET pp = pp - $1 WHERE username = $2",
-            price,
-            username
-        )
-        .execute(&state.postgres)
-        .await?;
+        "UPDATE users SET pp = pp - $1 WHERE username = $2",
+        price,
+        username
+    )
+    .execute(&state.postgres)
+    .await?;
 
     sqlx::query!(
-            "INSERT INTO profile_badges_link (users, award) VALUES ($1, $2)",
-            username,
-            award_id
-        )
-        .execute(&state.postgres)
-        .await?;
+        "INSERT INTO profile_badges_link (users, award) VALUES ($1, $2)",
+        username,
+        award_id
+    )
+    .execute(&state.postgres)
+    .await?;
     Ok(())
 }
 
@@ -98,7 +98,6 @@ pub struct ProfileBadge {
 pub async fn get_user_badges(
     Path(username): Path<String>,
     State(state): State<AppState>,
-    headers: HeaderMap,
 ) -> Result<Json<Vec<ProfileBadge>>, AppError> {
     let badges = query_as!(
         ProfileBadge,

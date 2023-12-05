@@ -5,14 +5,14 @@ pub mod user;
 use axum::routing::{delete, get, post, put};
 use axum::{middleware, Router};
 use lazy_static::lazy_static;
-use tower_http::services::ServeDir;
 use lettre::transport::smtp::authentication::Credentials;
-use lettre::{AsyncSmtpTransport, AsyncTransport, Tokio1Executor};
+use lettre::{AsyncSmtpTransport, Tokio1Executor};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 use std::env;
 use std::error::Error;
 use tokio::net::TcpListener;
+use tower_http::services::ServeDir;
 
 lazy_static! {
     pub static ref MAIL_CLIENT: AsyncSmtpTransport<Tokio1Executor> = {
@@ -100,7 +100,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "/notifications/",
             get(endpoints::notifications::get_notifications),
         )
-        .route("/shop/badges/:id/buy", post(endpoints::profile_badges::buy_badge))
+        .route(
+            "/shop/badges/:id/buy",
+            post(endpoints::profile_badges::buy_badge),
+        )
         .layer(middleware::from_fn_with_state(
             state.clone(),
             endpoints::auth::auth_middleware::<axum::body::Body>,
@@ -115,7 +118,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .route(
             "/profile/:username",
-            get(endpoints::profile::get_user_profile)
+            get(endpoints::profile::get_user_profile),
         )
         .route(
             "/shop/badges",

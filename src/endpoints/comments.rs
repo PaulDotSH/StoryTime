@@ -1,17 +1,14 @@
-use crate::endpoints::common::{
-    generate_token, get_role_from_header, get_username_from_header, FORMAT,
-};
+use crate::endpoints::common::{get_role_from_header, get_username_from_header};
 use crate::user::Role::User;
-use crate::{error::AppError, user::Role, AppState};
+use crate::{error::AppError, AppState};
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
-use axum::http::{header, HeaderMap};
-use axum::response::{IntoResponse, Redirect, Response};
+use axum::http::HeaderMap;
+use axum::response::{IntoResponse, Response};
 use axum::{extract::State, Json};
-use chrono::{Duration, NaiveDate, NaiveDateTime, Utc};
+use chrono::{NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
-use sqlx::{query, query_as, query_scalar};
+use sqlx::{query_as, query_scalar};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize)]
