@@ -63,7 +63,7 @@ pub async fn send_confirmation_email(
         r#"
         SELECT expire, code from email_confirmation where email = $1
         "#,
-        payload.email,
+        email,
     )
     .fetch_one(&state.postgres)
     .await;
@@ -83,7 +83,7 @@ pub async fn send_confirmation_email(
                 "#,
                 &code,
                 (Utc::now() + Duration::minutes(5)).naive_utc(),
-                payload.email,
+                email,
             )
             .execute(&state.postgres)
             .await?;
@@ -97,7 +97,7 @@ pub async fn send_confirmation_email(
                 INSERT INTO email_confirmation (email, code)
                 VALUES ($1, $2)
                 "#,
-            payload.email,
+            email,
             &code
         )
         .execute(&state.postgres)
