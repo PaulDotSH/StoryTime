@@ -1,14 +1,14 @@
-use crate::endpoints::common::generate_token;
+use crate::endpoints::common::{generate_token, get_role_from_header, get_username_from_header};
 use crate::{error::AppError, user::Role, AppState, MAIL_CLIENT};
 use anyhow::anyhow;
 use axum::extract::Path;
-use axum::http::StatusCode;
+use axum::http::{HeaderMap, StatusCode};
 use axum::{extract::State, Json};
 use chrono::{Duration, Utc};
 use lettre::message::header::ContentType;
 use lettre::{AsyncTransport, Message};
 use serde::{Deserialize, Serialize};
-use sqlx::query;
+use sqlx::{query, query_scalar};
 
 pub async fn confirm_email(
     State(state): State<AppState>,
@@ -40,17 +40,23 @@ pub async fn confirm_email(
     Ok(StatusCode::OK)
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct SendConfirmationMail {
-    email: String,
-}
-
 // TODO: Better error message when account email doesn't exist
 pub async fn send_confirmation_email(
     State(state): State<AppState>,
-    Json(payload): Json<SendConfirmationMail>,
+    headers: HeaderMap,
 ) -> Result<StatusCode, AppError> {
-    //TODO: Check if user already has verified email (Role > UnverifiedEmail)
+    let role = get_role_from_header(&headers);
+    if role != Role::UnconfirmedMail {
+        return Err(AppError(anyhow!("Email already verified")));
+    }
+    let username = get_username_from_header(&headers);
+
+    let email = query_scalar!(
+        r#"
+        SELECT email from users where username = $1
+        "#,
+        username,
+    ).fetch_one(&state.postgres).await?;
 
     // If there exists an unexpired code, don't create a new one
     let result = query!(
@@ -67,7 +73,7 @@ pub async fn send_confirmation_email(
         // If code didn't expire
         if r.expire > Utc::now().naive_utc() {
             // Send code that already exists
-            send_email_verification(&payload.email, &r.code).await?;
+            send_email_verification(&email, &r.code).await?;
         } else {
             // If code expired
             let code = generate_token(128);
@@ -81,7 +87,7 @@ pub async fn send_confirmation_email(
             )
             .execute(&state.postgres)
             .await?;
-            send_email_verification(&payload.email, &code).await?;
+            send_email_verification(&email, &code).await?;
         }
         // If code doesn't exist
     } else {
@@ -96,7 +102,7 @@ pub async fn send_confirmation_email(
         )
         .execute(&state.postgres)
         .await?;
-        send_email_verification(&payload.email, &code).await?;
+        send_email_verification(&email, &code).await?;
     }
 
     Ok(StatusCode::OK)
