@@ -261,17 +261,6 @@ Status code 500 (lack of permission, doesnt exist etc)
 ### Send code verification
 #### Endpoint:
 `POST` `/resend`
-#### Input:
-Type: `Json`
-```
-email: string
-```
-Example:
-```
-{
-    "email": "test.name@gmail.com"
-}
-```
 #### Output:
 ```
 Status code 500 (email doesnt exist or db error)
