@@ -29,6 +29,23 @@ CREATE TABLE IF NOT EXISTS places (
                                       owner Text NOT NULL references users(username)
 );
 
+CREATE TABLE IF NOT EXISTS place_tags (
+    name Text NOT NULL PRIMARY KEY,
+    place Text NOT NULL references places(name)
+);
+
+CREATE TABLE IF NOT EXISTS place_mod_fk(
+    place Text NOT NULL references places(name),
+    users TEXT NOT NULL references users(username),
+    perm TEXT NOT NULL DEFAULT '' -- TODO: Use this after thinking of an actual permission system
+);
+
+
+
+-- TODO: Create index on place_tags(place), implement tags on posts
+
+
+
     CREATE TABLE IF NOT EXISTS story_parts (
                                                id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
                                                writer Text NOT NULL REFERENCES users(username),

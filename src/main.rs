@@ -39,6 +39,8 @@ pub async fn sample_response_handler() -> String {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    
+
     dotenvy::dotenv()?;
     let pool = PgPoolOptions::new()
         .max_connections(8) // TODO: Check what number would be appropriate here
