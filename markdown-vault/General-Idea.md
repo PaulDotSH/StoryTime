@@ -9,4 +9,3 @@
 - After 24h posts are mad cannon
 - Snippets can be marked as "final", which will end the story if they get voted.
 - Think of a way to implement PPs, stripe payment, awards, profile badges, profile checkmark?, custom profile (subscription based)
-q
