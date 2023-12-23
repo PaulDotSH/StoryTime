@@ -4,6 +4,7 @@ use crate::{error::AppError, AppState};
 use anyhow::anyhow;
 use axum::http::{HeaderMap, StatusCode};
 use axum::{extract::State, Json};
+use axum::extract::Path;
 use serde::{Deserialize, Serialize};
 use sqlx::{query, query_scalar};
 
@@ -15,7 +16,6 @@ pub struct NewPlace {
     rules: String,
 }
 
-#[axum::debug_handler]
 pub async fn new_place(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -57,6 +57,37 @@ pub async fn new_place(
     Ok(StatusCode::OK)
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct NewPlaceTag {
+    name: String,
+    place: String,
+}
+
+pub async fn new_place_tag(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(payload): Json<NewPlaceTag>,
+) -> Result<(), AppError> {
+    //TODO: Check if the user is place owner or moderator
+
+    sqlx::query!(
+        r#"
+            INSERT INTO place_tags(name, place) VALUES ($1, $2);
+        "#,
+        payload.name,
+        payload.place
+    )
+        .execute(&state.postgres)
+        .await?;
+    Ok(())
+}
+
+//Delete tag with CASCADE to also remove it from the link table
+
+//Add tag to snippet
+
+//Remove tag from snippet
+
 //Basic read with pagination
 
 //Transfer ownership
@@ -66,3 +97,5 @@ pub async fn new_place(
 //Update description
 
 //Upload photo
+
+//TODO: After all of these also return the tags a snippet has

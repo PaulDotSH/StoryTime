@@ -63,7 +63,6 @@ pub async fn login_handler(
         Default::default(),
     )
     .await?;
-
     let cookie = format!("TOKEN={}; Path=/; Max-Age=604800", &token);
 
     let mut headers = HeaderMap::new();
