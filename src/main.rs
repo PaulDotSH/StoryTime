@@ -108,6 +108,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "/place/tag/new",
             post(endpoints::place::new_place_tag)
         )
+        .route(
+            "/place/transfer",
+            post(endpoints::place::transfer_ownership)
+        )
         .layer(middleware::from_fn_with_state(
             state.clone(),
             endpoints::auth::auth_middleware::<axum::body::Body>,

@@ -24,7 +24,7 @@ pub async fn new_place(
     let role = get_role_from_header(&headers);
 
     if role < User {
-        return Err(AppError(anyhow!("You do not have permission to post a story snippet, make sure you confirmed your email and are not banned!")));
+        return Err(AppError(anyhow!("Make sure you confirmed your email and are not banned!")));
     }
 
     let username = get_username_from_header(&headers);
@@ -91,6 +91,40 @@ pub async fn new_place_tag(
 //Basic read with pagination
 
 //Transfer ownership
+#[derive(Serialize, Deserialize)]
+pub struct TransferPlace {
+    place: String,
+    new_owner: String
+}
+
+pub async fn transfer_ownership(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Json(payload): Json<TransferPlace>,
+) -> Result<(), AppError> {
+    let username = get_username_from_header(&headers);
+    let place = sqlx::query!(
+        r#"
+            SELECT name FROM places WHERE name = $1 AND owner = $2;
+        "#,
+        payload.place,
+        username
+    )
+        .fetch_one(&state.postgres)
+        .await?;
+
+
+    sqlx::query!(
+        r#"
+            UPDATE places SET owner = $1 WHERE name = $2;
+        "#, //UPDATE users SET token = $1, tok_expire = $2 WHERE username = $3
+        payload.new_owner,
+        payload.place
+    )
+        .execute(&state.postgres)
+        .await?;
+    Ok(())
+}
 
 //Update rules
 
