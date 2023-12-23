@@ -418,6 +418,46 @@ OR
   ]
 }
 ```
+## Place
+### Transfer place
+#### Endpoint:
+`POST` `/place/transfer`
+#### Input:
+Type: `json`
+Example:
+```json
+{
+  "place": "fantasy",
+  "new_owner": "mariusel"
+}
+```
+#### Output:
+```
+Status code 500 (user is not place owner, or new owner doesn't exist)
+```
+### New place endpoint
+#### Endpoint:
+`POST` `/places/new`
+#### Input:
+Type: `json`
+Example:
+```json
+{
+  "name": "fantasy",
+  "description": "a nice place for fantasy stories",
+  "rules": "Follow storytime tos"
+}
+```
+#### Output:
+```
+You don't have enough score to create a place
+OR
+Make sure you confirmed your email and are not banned!
+OR
+Status Code 500 with no error response
+OR
+Status Code 200
+```
 ## Place tags
 ### New place tag
 #### Endpoint:
