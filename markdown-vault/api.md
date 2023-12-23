@@ -418,3 +418,22 @@ OR
   ]
 }
 ```
+## Place tags
+### New place tag
+#### Endpoint:
+`POST` `/place/tag/new`
+#### Input:
+Type: `json`
+Example:
+```json
+{
+	"name": "tag1",
+	"place": "fantasy"
+}
+```
+#### Output:
+```
+Status code 500 (db error)
+or
+Invalid permissions
+```

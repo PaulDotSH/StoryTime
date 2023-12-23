@@ -20,7 +20,7 @@ tower-http = { version = "0.5.0", features = ["uuid", "cors", "tokio", "fs"] }
 uuid = { version = "1.6.1", features = ["zerocopy", "v4", "serde"] }
 axum-macros = "0.4.0"
 lazy_static = { version = "1.4.0", features = [] }
-tokio-rustls = "0.24.1"
+tokio-rustls = "0.25.0"
 lettre = { version = "0.11.2", features = ["tokio1-rustls-tls", "tokio1-native-tls"] }
 
 [profile.release]

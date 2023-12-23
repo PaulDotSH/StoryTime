@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS places (
 );
 
 CREATE TABLE IF NOT EXISTS place_tags (
-    name Text NOT NULL PRIMARY KEY,
+    id Serial NOT NULL PRIMARY KEY,
+    name Text NOT NULL UNIQUE,
     place Text NOT NULL references places(name)
 );
 
@@ -38,6 +39,11 @@ CREATE TABLE IF NOT EXISTS place_mod_fk(
     place Text NOT NULL references places(name),
     users TEXT NOT NULL references users(username),
     perm TEXT NOT NULL DEFAULT '' -- TODO: Use this after thinking of an actual permission system
+);
+
+CREATE TABLE IF NOT EXISTS tags_link (
+                                          tag serial NOT NULL references place_tags(id),
+                                          snippet uuid NOT NULL references story_parts(id)
 );
 
 
