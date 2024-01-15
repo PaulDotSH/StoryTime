@@ -112,6 +112,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "/place/transfer",
             post(endpoints::place::transfer_ownership)
         )
+        .route("/resend", post(endpoints::email::send_confirmation_email))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             endpoints::auth::auth_middleware::<axum::body::Body>,
@@ -119,7 +120,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .route("/login", post(endpoints::login::login_handler))
         .route("/register", post(endpoints::register::register_handler))
         .route("/confirm/:id", post(endpoints::email::confirm_email))
-        .route("/resend", post(endpoints::email::send_confirmation_email))
         .route(
             "/profile/:username/badges",
             get(endpoints::profile_badges::get_user_badges),
