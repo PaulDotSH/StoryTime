@@ -8,15 +8,11 @@ async function send({ method, path, data, token }) {
 		'Content-Type': 'application/json'
 	};
 
-    if (token) {
-        headers['Authorization'] = `Token ${token}`;
-    }
-
     try {
         const response = await axios[method.toLowerCase()](`${base}/${path}`, data, { headers });
 
         if (response.status === 200) {
-            return response.statusText || {};
+            return response;
         }
 
         throw error();

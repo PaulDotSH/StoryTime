@@ -4,6 +4,18 @@
 
 	/** @type {import('./$types').ActionData} */
 	export let form;
+
+	async function login() {
+		const response = await fetch('http://localhost:5431/login', {
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ username: "test4", password: "123" }),
+		});
+	}
+
 </script>
 
 <svelte:head>
@@ -21,7 +33,7 @@
 
 				<ListErrors errors={form?.errors} />
 
-				<form use:enhance method="POST">
+				<form on:submit={login}>
 					<fieldset class="form-group">
 						<input
 							class="form-control form-control-lg"
