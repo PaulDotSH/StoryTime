@@ -8,12 +8,15 @@
 	async function login() {
 		const response = await fetch('http://localhost:5431/login', {
 			method: 'POST',
-			credentials: 'include',
+			// credentials: 'include',
+			credentials: 'same-origin',
 			headers: {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({ username: "test4", password: "123" }),
 		});
+		console.log(response.headers["set-cookie"])
+		console.log(response.headers)
 	}
 
 </script>

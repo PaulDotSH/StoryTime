@@ -67,6 +67,8 @@ pub async fn login_handler(
 
     let mut headers = HeaderMap::new();
     headers.insert(header::SET_COOKIE, cookie.parse().unwrap());
+    // headers.insert(header::ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173".parse().unwrap());
+    // println!("{:?}", headers);
 
-    Ok((headers, StatusCode::OK).into_response())
+    Ok(headers.into_response())
 }
