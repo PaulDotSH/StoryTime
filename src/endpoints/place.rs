@@ -90,7 +90,6 @@ pub async fn new_place_tag(
 
 //Basic read with pagination
 
-//Transfer ownership
 #[derive(Serialize, Deserialize)]
 pub struct TransferPlace {
     place: String,
