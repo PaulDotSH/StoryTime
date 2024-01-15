@@ -20,8 +20,14 @@ export const actions = {
 			return fail(401, body);
 		}
 
-		const value = btoa(JSON.stringify(body.user));
-		cookies.set('jwt', value, { path: '/' });
+		const setCookieHeader = response.headers.get('Set-Cookie');
+		if (setCookieHeader) {
+		  // Use js-cookie to parse and set the cookie
+		  Cookies.set('TOKEN', setCookieHeader);
+  
+		  // Redirect to the home page or another route
+		  window.location.href = '/';
+		}
 
 		throw redirect(307, '/');
 	}

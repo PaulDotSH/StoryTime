@@ -1,12 +1,29 @@
 <script>
-	import { enhance } from '$app/forms';
-	import ListErrors from '$lib/ListErrors.svelte';
+    import { enhance } from '$app/forms';
+    import ListErrors from '$lib/ListErrors.svelte';
+    import * as api from '$lib/api.js'; // Import the API module
 
-	/** @type {import('./$types').PageData} */
-	export let data;
+    /** @type {import('./$types').PageData} */
+    export let data;
 
-	/** @type {import('./$types').ActionData} */
-	export let form;
+    /** @type {import('./$types').ActionData} */
+    export let form;
+
+    async function handleConfirmEmail(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        try {
+            const body = await api.post('notifications');
+            if (body.errors) {
+                console.error('Error sending confirmation:', body.errors);
+                form.errors = body.errors;
+            } else {
+                console.log('Confirmation code sent successfully');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 </script>
 
 <svelte:head>
@@ -87,7 +104,7 @@
 
 				<hr />
 
-				<form use:enhance method="POST" action="?/confirmation">
+				<form use:enhance method="POST" action="?/confirmation" on:submit={handleConfirmEmail}>
 					<button class="btn">Confirm your email</button>
 				</form>
 
