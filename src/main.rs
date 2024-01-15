@@ -13,6 +13,7 @@ use std::env;
 use std::error::Error;
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
+use tower_http::cors::CorsLayer;
 
 lazy_static! {
     pub static ref MAIL_CLIENT: AsyncSmtpTransport<Tokio1Executor> = {
@@ -132,6 +133,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "/shop/badges",
             get(endpoints::profile_badges::get_shop_badges),
         )
+        .layer(CorsLayer::permissive())
         .with_state(state)
         .route("/", get(sample_response_handler))
         .nest_service("/assets", serve_dir_from_assets);
