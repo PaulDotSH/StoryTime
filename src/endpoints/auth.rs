@@ -19,6 +19,7 @@ pub async fn auth_middleware<B>(
     mut request: Request<Body>, // insert the username and role headers in the following requests in case they are needed so we don't hit the database again
     next: Next,                 // So we can forward the request
 ) -> Response {
+    println!("{:?}", request);
     let headers = request.headers_mut();
 
     let Some(cookie) = headers.get("cookie").cloned() else {
@@ -38,20 +39,20 @@ pub async fn auth_middleware<B>(
                 "SELECT username, tok_expire, perm FROM users WHERE token = $1",
                 token
             )
-            .fetch_one(&state.postgres)
-            .await
-            else {
-                return (StatusCode::INTERNAL_SERVER_ERROR, "Invalid token").into_response();
-            };
+                .fetch_one(&state.postgres)
+                .await
+                else {
+                    return (StatusCode::INTERNAL_SERVER_ERROR, "Invalid token").into_response();
+                };
 
             if user.tok_expire < Utc::now().naive_utc() {
                 sqlx::query!(
                     "UPDATE users SET token = NULL WHERE username = $1",
                     user.username
                 )
-                .execute(&state.postgres)
-                .await
-                .unwrap(); // Shouldn't fail
+                    .execute(&state.postgres)
+                    .await
+                    .unwrap(); // Shouldn't fail
                 return StatusCode::UNAUTHORIZED.into_response();
             }
 
