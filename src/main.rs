@@ -3,7 +3,7 @@ pub mod error;
 pub mod user;
 
 use axum::routing::{delete, get, post, put};
-use axum::{middleware, Router};
+use axum::{http, middleware, Router};
 use lazy_static::lazy_static;
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{AsyncSmtpTransport, Tokio1Executor};
@@ -11,8 +11,10 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 use std::env;
 use std::error::Error;
+use axum::http::{HeaderValue, Method};
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
+use tower_http::cors::{any, CorsLayer};
 
 lazy_static! {
     pub static ref MAIL_CLIENT: AsyncSmtpTransport<Tokio1Executor> = {
@@ -50,6 +52,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let state = AppState { postgres: pool }; // TODO: Maybe add redis here for caching queries
 
     let serve_dir_from_assets = ServeDir::new("assets");
+
+    let cors = CorsLayer::new()
+        // allow `GET` and `POST` when accessing the resource
+        .allow_methods(vec![Method::GET, Method::POST])
+        .allow_headers([http::header::AUTHORIZATION, http::header::ACCEPT, http::header::CONTENT_TYPE])
+        .allow_credentials(true)
+        .allow_origin(
+            "http://localhost:5173".parse::<HeaderValue>().unwrap(),
+        );
 
     let app = Router::new()
         .route("/auth-only", get(sample_response_handler))
@@ -129,10 +140,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             get(endpoints::profile::get_user_profile),
         )
         .route(
+            "/profile",
+            get(endpoints::profile::get_current_user_profile),
+        )
+        .route(
             "/shop/badges",
             get(endpoints::profile_badges::get_shop_badges),
         )
         .with_state(state)
+        .layer(cors)
         .route("/", get(sample_response_handler))
         .nest_service("/assets", serve_dir_from_assets);
 

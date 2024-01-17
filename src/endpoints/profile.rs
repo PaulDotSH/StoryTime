@@ -1,10 +1,12 @@
 use crate::{error::AppError, user::Role, AppState};
 use axum::extract::Path;
 use axum::{extract::State, Json};
+use axum::http::HeaderMap;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::{query, query_as};
 use uuid::Uuid;
+use crate::endpoints::common::get_username_from_header;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserProfile {
@@ -36,6 +38,38 @@ pub struct UserProfileSnippet {
     place: String,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct CurrentUserProfile<'a> {
+    username: &'a str,
+    email: &'a str,
+    perm: Role,
+    score: i32,
+    pp: i32
+}
+
+pub async fn get_current_user_profile(
+    State(state): State<AppState>,
+    headers: HeaderMap
+) -> Result<Json<CurrentUserProfile>, AppError> {
+    let username = get_username_from_header(&headers); // This cannot fail since we set it in middleware
+    let user_row = query!(
+        r#"
+        SELECT email, perm, score, pp FROM users WHERE username = $1;
+        "#,
+        username,
+    )
+        .fetch_one(&state.postgres)
+        .await?;
+
+    Ok(Json(CurrentUserProfile{
+        username,
+        email: &user_row.email,
+        perm: Role::from(user_row.perm),
+        score: user_row.score,
+        pp: user_row.pp,
+    }))
+}
+
 pub async fn get_user_profile(
     Path(username): Path<String>,
     State(state): State<AppState>,
@@ -46,8 +80,8 @@ pub async fn get_user_profile(
         "#,
         username,
     )
-    .fetch_one(&state.postgres)
-    .await?;
+        .fetch_one(&state.postgres)
+        .await?;
 
     let comments = query_as!(
         UserProfileComment,
