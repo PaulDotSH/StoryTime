@@ -19,13 +19,7 @@
 
 				<li class="nav-item">
 					<a href="/profile/settings" class="nav-link" class:active={$page.url.pathname === '/settings'}>
-						<i class="ion-gear-a" />&nbsp; Profile settings
-					</a>
-				</li>
-
-				<li class="nav-item">
-					<a href="/profile/{$page.data.user.username}" class="nav-link">
-						{$page.data.user.username}
+						<i class="ion-gear-a" />&nbsp; {$page.data.user.username}
 					</a>
 				</li>
 			{:else}

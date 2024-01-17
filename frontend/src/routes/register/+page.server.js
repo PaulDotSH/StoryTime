@@ -22,15 +22,12 @@ export const actions = {
             return fail(401, body);
         }
 
-        const value = btoa(JSON.stringify(body.user));
-        cookies.set('jwt', value, { path: '/' });
-
-        // // Temporary this will be here because user endpoint isn't ready yet. When it's ready, this will be moved to /confirmation page
-        // const body1 = await api.post('resend', { email });
-
-        // if (body1.errors) {
-        //     console.error('Error in the second request:', body1.errors);
-        // }
+        console.log(body.data);
+        const token = body.data;
+        cookies.set('jwt', token, { 
+            path: '/', 
+            maxAge: 604800
+        });
 
         throw redirect(307, '/');
     }
