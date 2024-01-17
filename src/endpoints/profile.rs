@@ -39,9 +39,9 @@ pub struct UserProfileSnippet {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct CurrentUserProfile<'a> {
-    username: &'a str,
-    email: &'a str,
+pub struct CurrentUserProfile {
+    username: String,
+    email: String,
     perm: Role,
     score: i32,
     pp: i32
@@ -62,8 +62,8 @@ pub async fn get_current_user_profile(
         .await?;
 
     Ok(Json(CurrentUserProfile{
-        username,
-        email: &user_row.email,
+        username: username.to_string(),
+        email: user_row.email,
         perm: Role::from(user_row.perm),
         score: user_row.score,
         pp: user_row.pp,
