@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let cors = CorsLayer::new()
         // allow `GET` and `POST` when accessing the resource
         .allow_methods(vec![Method::GET, Method::POST])
-        .allow_headers([http::header::AUTHORIZATION, http::header::ACCEPT, http::header::CONTENT_TYPE])
+        .allow_headers([http::header::ACCESS_CONTROL_ALLOW_CREDENTIALS,http::header::AUTHORIZATION, http::header::ACCEPT, http::header::CONTENT_TYPE, http::header::ORIGIN])
         .allow_credentials(true)
         .allow_origin(
             "http://localhost:5173".parse::<HeaderValue>().unwrap(),

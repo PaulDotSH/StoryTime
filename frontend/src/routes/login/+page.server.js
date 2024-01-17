@@ -22,7 +22,7 @@ export const actions = {
         }
 		console.log(response.data);
         const token = response.data;
-        cookies.set('jwt', token, { 
+        cookies.set('TOKEN', token, { 
             path: '/', 
             maxAge: 604800 // 1 week
         });

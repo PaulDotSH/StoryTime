@@ -10,12 +10,13 @@
     export let form;
 
     async function handleConfirmEmail(event) {
-        event.preventDefault(); // Prevent the default form submission
+        event.preventDefault();
+
         try {
-            const body = await api.post('notifications');
-            if (body.errors) {
-                console.error('Error sending confirmation:', body.errors);
-                form.errors = body.errors;
+            const response = await api.post('resend'); // Use Axios instance to make the request
+            if (response.data.errors) {
+                console.error('Error sending confirmation:', response.data.errors);
+                form.errors = response.data.errors;
             } else {
                 console.log('Confirmation code sent successfully');
             }
@@ -104,7 +105,7 @@
 
 				<hr />
 
-				<form use:enhance method="POST" action="?/confirmation">
+				<form on:submit={handleConfirmEmail} use:enhance method="POST" action="?/confirmation">
 					<button class="btn">Confirm your email</button>
 				</form>
 
