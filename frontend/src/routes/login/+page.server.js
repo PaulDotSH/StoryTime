@@ -1,34 +1,32 @@
 import { fail, redirect } from '@sveltejs/kit';
-import * as api from '$lib/api.js';
+import * as api from '$lib/api.js'; // Update this to point to your Rust backend
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ locals }) {
-	if (locals.user) throw redirect(307, '/');
+    if (locals.user) throw redirect(307, '/');
 }
 
 /** @type {import('./$types').Actions} */
 export const actions = {
-	default: async ({ cookies, request }) => {
-		const data = await request.formData();
-		//console.log(data);
-		const body = await api.post('login', {
-				username: data.get('username'),
-				password: data.get('password')
-		});
+    default: async ({ cookies, request }) => {
+        const data = await request.formData();
 
-		if (body.errors) {
-			return fail(401, body);
-		}
+        // Update the API call to interact with your Rust backend
+        const response = await api.post('login', {
+            username: data.get('username'),
+            password: data.get('password')
+        });
 
-		const setCookieHeader = response.headers.get('Set-Cookie');
-		if (setCookieHeader) {
-		  // Use js-cookie to parse and set the cookie
-		  Cookies.set('TOKEN', setCookieHeader);
-  
-		  // Redirect to the home page or another route
-		  window.location.href = '/';
-		}
+        if (response.status !== 200) {
+            return fail(response.status, { errors: 'Login failed' });
+        }
+		console.log(response.data);
+        const token = response.data;
+        cookies.set('jwt', token, { 
+            path: '/', 
+            maxAge: 604800 // 1 week
+        });
 
-		throw redirect(307, '/');
-	}
+        throw redirect(307, '/');
+    }
 };
