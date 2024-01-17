@@ -15,9 +15,9 @@ async function send({ method, path, data, token }) {
         url: `${base}/${path}`,
         data: data,
         headers: headers,
-        withCredentials: true
+        withCredentials: true,
         //set credentials to same-origin to include cookies in the request
-        //credentials: 'same-origin'
+        credentials: 'include'
     };
 
     try {

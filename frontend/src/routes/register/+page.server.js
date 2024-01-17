@@ -24,7 +24,7 @@ export const actions = {
 
         console.log(body.data);
         const token = body.data;
-        cookies.set('jwt', token, { 
+        cookies.set('TOKEN', token, { 
             path: '/', 
             maxAge: 604800
         });

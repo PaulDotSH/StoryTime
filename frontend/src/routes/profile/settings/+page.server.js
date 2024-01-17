@@ -8,7 +8,7 @@ export function load({ locals }) {
 /** @type {import('./$types').Actions} */
 export const actions = {
 	logout: async ({ cookies, locals }) => {
-		cookies.delete('jwt', { path: '/' });
+		cookies.delete('TOKEN', { path: '/' });
 		locals.user = null;
 	},
 
@@ -32,7 +32,7 @@ export const actions = {
 
 		console.log(body.data);
         const token = body.data;
-        cookies.set('jwt', token, { 
+        cookies.set('TOKEN', token, { 
             path: '/', 
             maxAge: 604800
         });
