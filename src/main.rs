@@ -14,7 +14,7 @@ use std::error::Error;
 use axum::http::{HeaderValue, Method};
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
-use tower_http::cors::{any, CorsLayer};
+use tower_http::cors::{CorsLayer};
 
 lazy_static! {
     pub static ref MAIL_CLIENT: AsyncSmtpTransport<Tokio1Executor> = {
