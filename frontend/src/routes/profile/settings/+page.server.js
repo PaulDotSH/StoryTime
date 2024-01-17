@@ -41,9 +41,6 @@ export const actions = {
 	},
 
     confirmation: async () => {
-		const body = await api.post('resend');
-		if (body.errors) return fail(500, body.errors);
-		console.log(body.data);
         throw redirect(307, '/confirmation'); 
     },
 };
