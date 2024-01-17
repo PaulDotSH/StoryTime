@@ -19,6 +19,7 @@ pub async fn auth_middleware<B>(
     mut request: Request<Body>, // insert the username and role headers in the following requests in case they are needed so we don't hit the database again
     next: Next,                 // So we can forward the request
 ) -> Response {
+    println!("{:?}", request);
     let headers = request.headers_mut();
 
     let Some(cookie) = headers.get("cookie").cloned() else {

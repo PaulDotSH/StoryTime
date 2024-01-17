@@ -8,6 +8,22 @@
 
     /** @type {import('./$types').ActionData} */
     export let form;
+
+    async function handleConfirmEmail(event) {
+        event.preventDefault(); // Prevent the default form submission
+        try {
+            const body = await api.post('notifications');
+            if (body.errors) {
+                console.error('Error sending confirmation:', body.errors);
+                form.errors = body.errors;
+            } else {
+                console.log('Confirmation code sent successfully');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
 </script>
 
 <svelte:head>
