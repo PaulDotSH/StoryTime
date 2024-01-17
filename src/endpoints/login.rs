@@ -63,12 +63,12 @@ pub async fn login_handler(
         Default::default(),
     )
     .await?;
-    //let cookie = format!("TOKEN={}; Path=/; Max-Age=604800", &token);
+    let cookie = format!("TOKEN={}; Path=/; Max-Age=604800", &token);
 
-    //let mut headers = HeaderMap::new();
-    //headers.insert(header::SET_COOKIE, cookie.parse().unwrap());
+    let mut headers = HeaderMap::new();
+    headers.insert(header::SET_COOKIE, cookie.parse().unwrap());
     // headers.insert(header::ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173".parse().unwrap());
     // println!("{:?}", headers);
 
-    Ok(token.to_string().into_response())
+    Ok((headers, token).into_response())
 }
