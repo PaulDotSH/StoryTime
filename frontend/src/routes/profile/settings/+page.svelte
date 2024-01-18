@@ -58,7 +58,7 @@
 								name="email"
 								type="email"
 								placeholder="Email"
-								value={"email"}
+								value={email}
 							/>
 						</fieldset>
 
