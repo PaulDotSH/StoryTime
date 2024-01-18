@@ -19,10 +19,6 @@
 	<title>Settings • StoryTime</title>
 </svelte:head>
 
-<div class="user-info">
-    <p>Username: {username}</p>
-</div>
-
 <div class="settings-page">
 	<div class="container page">
 		<div class="row">
