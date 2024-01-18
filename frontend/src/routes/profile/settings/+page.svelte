@@ -1,35 +1,27 @@
 <script>
     import { enhance } from '$app/forms';
     import ListErrors from '$lib/ListErrors.svelte';
-    import * as api from '$lib/api.js'; // Import the API module
 
-    /** @type {import('./$types').PageData} */
-    export let data;
+	
+	export let username;
+    export let email;
+
+    // /** @type {import('./$types').PageData} */
+    // export let data;
 
     /** @type {import('./$types').ActionData} */
     export let form;
 
-    async function handleConfirmEmail(event) {
-        event.preventDefault();
-
-        try {
-            const response = await api.post('resend'); // Use Axios instance to make the request
-            if (response.data.errors) {
-                console.error('Error sending confirmation:', response.data.errors);
-                form.errors = response.data.errors;
-            } else {
-                console.log('Confirmation code sent successfully');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
-
+	console.log({ username, email });
 </script>
 
 <svelte:head>
 	<title>Settings • StoryTime</title>
 </svelte:head>
+
+<div class="user-info">
+    <p>Username: {username}</p>
+</div>
 
 <div class="settings-page">
 	<div class="container page">
@@ -56,7 +48,7 @@
 								name="username"
 								type="text"
 								placeholder="Username"
-								value={data.user.username}
+								value={username}
 							/>
 						</fieldset>
 
@@ -66,7 +58,7 @@
 								name="email"
 								type="email"
 								placeholder="Email"
-								value={data.user.email}
+								value={"email"}
 							/>
 						</fieldset>
 
@@ -76,17 +68,7 @@
 								name="bio"
 								rows="8"
 								placeholder="Tell us a little about yourself!"
-								value={data.user.bio}
-							/>
-						</fieldset>
-
-						<fieldset class="form-group">
-							<input
-								class="form-control"
-								name="image"
-								type="text"
-								placeholder="URL of profile picture"
-								value={data.user.image}
+								value={""}
 							/>
 						</fieldset>
 
@@ -105,7 +87,14 @@
 
 				<hr />
 
-				<form on:submit={handleConfirmEmail} use:enhance method="POST" action="?/confirmation">
+				<form use:enhance method="POST" action="?/resend">
+					<button class="btn">Send confirmation mail</button>
+				</form>
+
+
+				<hr />
+
+				<form use:enhance method="POST" action="?/confirmation">
 					<button class="btn">Confirm your email</button>
 				</form>
 

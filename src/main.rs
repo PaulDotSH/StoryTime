@@ -14,7 +14,7 @@ use std::error::Error;
 use axum::http::{HeaderValue, Method};
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
-use tower_http::cors::{CorsLayer};
+use tower_http::cors::{any, CorsLayer};
 
 lazy_static! {
     pub static ref MAIL_CLIENT: AsyncSmtpTransport<Tokio1Executor> = {
@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let cors = CorsLayer::new()
         // allow `GET` and `POST` when accessing the resource
         .allow_methods(vec![Method::GET, Method::POST])
-        .allow_headers([http::header::ACCESS_CONTROL_ALLOW_CREDENTIALS,http::header::AUTHORIZATION, http::header::ACCEPT, http::header::CONTENT_TYPE, http::header::ORIGIN])
+        .allow_headers([http::header::AUTHORIZATION, http::header::ACCEPT, http::header::CONTENT_TYPE])
         .allow_credentials(true)
         .allow_origin(
             "http://localhost:5173".parse::<HeaderValue>().unwrap(),
@@ -118,6 +118,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .route(
             "/place/tag/new",
             post(endpoints::place::new_place_tag)
+        )
+        .route(
+            "/profile",
+            get(endpoints::profile::get_current_user_profile),
         )
         .route(
             "/place/transfer",

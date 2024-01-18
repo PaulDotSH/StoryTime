@@ -24,7 +24,7 @@ export const actions = {
         const token = response.data;
         cookies.set('TOKEN', token, { 
             path: '/', 
-            maxAge: 604800 // 1 week
+            maxAge: 604800, // 1 week
         });
 
         throw redirect(307, '/');

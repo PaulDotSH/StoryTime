@@ -1,8 +1,32 @@
 import { fail, redirect } from '@sveltejs/kit';
 import * as api from '$lib/api.js';
 
-export function load({ locals }) {
+export async function load({ request, cookies, locals }) {
 	if (!locals.user) throw redirect(302, '/login');
+
+    try {
+
+		let cookieData = `TOKEN=${cookies.get('TOKEN')}`;
+	
+		const response = await api.get('profile', {} , cookieData);
+		console.log({ username: response.data.username, email: response.data.email });
+
+
+        return {
+            props: {
+                username: response.data.username,
+                email: response.data.email
+            }
+        };
+    } catch (error) {
+        console.error('Error fetching profile data:', error);
+        return {
+            props: {
+                error: 'Failed to fetch profile data.'
+            }
+        };
+    }
+
 }
 
 /** @type {import('./$types').Actions} */
@@ -43,4 +67,9 @@ export const actions = {
     confirmation: async () => {
         throw redirect(307, '/confirmation'); 
     },
+
+	resend: async () => {
+        throw redirect(307, '/resend'); 
+    },
+	
 };
