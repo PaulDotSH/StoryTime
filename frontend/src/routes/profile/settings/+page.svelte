@@ -1,12 +1,18 @@
 <script>
-	import { enhance } from '$app/forms';
-	import ListErrors from '$lib/ListErrors.svelte';
+    import { enhance } from '$app/forms';
+    import ListErrors from '$lib/ListErrors.svelte';
 
-	/** @type {import('./$types').PageData} */
-	export let data;
+	
+	export let username;
+    export let email;
 
-	/** @type {import('./$types').ActionData} */
-	export let form;
+    // /** @type {import('./$types').PageData} */
+    // export let data;
+
+    /** @type {import('./$types').ActionData} */
+    export let form;
+
+	console.log({ username, email });
 </script>
 
 <svelte:head>
@@ -38,7 +44,7 @@
 								name="username"
 								type="text"
 								placeholder="Username"
-								value={data.user.username}
+								value={username}
 							/>
 						</fieldset>
 
@@ -48,7 +54,7 @@
 								name="email"
 								type="email"
 								placeholder="Email"
-								value={data.user.email}
+								value={email}
 							/>
 						</fieldset>
 
@@ -58,17 +64,7 @@
 								name="bio"
 								rows="8"
 								placeholder="Tell us a little about yourself!"
-								value={data.user.bio}
-							/>
-						</fieldset>
-
-						<fieldset class="form-group">
-							<input
-								class="form-control"
-								name="image"
-								type="text"
-								placeholder="URL of profile picture"
-								value={data.user.image}
+								value={""}
 							/>
 						</fieldset>
 
@@ -84,6 +80,13 @@
 						<button class="btn btn-lg btn-primary pull-xs-right">Update Profile</button>
 					</fieldset>
 				</form>
+
+				<hr />
+
+				<form use:enhance method="POST" action="?/resend">
+					<button class="btn">Send confirmation mail</button>
+				</form>
+
 
 				<hr />
 
