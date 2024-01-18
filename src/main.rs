@@ -120,6 +120,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             post(endpoints::place::new_place_tag)
         )
         .route(
+            "/profile",
+            get(endpoints::profile::get_current_user_profile),
+        )
+        .route(
             "/place/transfer",
             post(endpoints::place::transfer_ownership)
         )

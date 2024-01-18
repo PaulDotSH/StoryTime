@@ -3,7 +3,7 @@ use crate::endpoints::notifications::{create_notification, Kind};
 use crate::{error::AppError, AppState};
 use anyhow::anyhow;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
-use axum::http::{header, HeaderMap};
+use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::{extract::State, Json};
 use chrono::{Duration, Utc};
@@ -67,6 +67,8 @@ pub async fn login_handler(
 
     let mut headers = HeaderMap::new();
     headers.insert(header::SET_COOKIE, cookie.parse().unwrap());
+    // headers.insert(header::ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:5173".parse().unwrap());
+    // println!("{:?}", headers);
 
-    Ok((headers, Redirect::to("/")).into_response())
+    Ok((headers, token).into_response())
 }

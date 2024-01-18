@@ -1,42 +1,55 @@
 import axios from 'axios';
-import { error } from '@sveltejs/kit';
+import { fail, redirect, error } from '@sveltejs/kit';
 
-const base = 'http://127.0.0.1:5431'; // Ensure you include the protocol (http/https)
+const base = 'http://127.0.0.1:5431';
 
-async function send({ method, path, data, token }) {
+async function send({ method, path, data, cookies }) {
     const headers = {
-		'Content-Type': 'application/json'
-	};
+        'Content-Type': 'application/json'
+    };
 
-    if (token) {
-        headers['Authorization'] = `Token ${token}`;
+    
+
+    if (cookies) {
+        headers.Cookie = cookies;
+        
     }
+
+    const config = {
+        method: method,
+        url: `${base}/${path}`,
+        data: data,
+        headers: headers,
+        withCredentials: true,
+        credentials: 'same-origin'
+    };
 
     try {
-        const response = await axios[method.toLowerCase()](`${base}/${path}`, data, { headers });
+        const response = await axios(config);
 
         if (response.status === 200) {
-            return response.statusText || {};
+            return response;
         }
 
-        throw error();
-    } catch (error) {
-        throw error;
+        throw error(response.status, response.statusText);
+    } catch (err) {
+        // Improved error handling
+        throw error(err.response?.status || 500, err.response?.statusText || 'Server error');
     }
 }
 
-export function get(path, token) {
-    return send({ method: 'GET', path, token });
+export function get(path, data, cookies) {
+    return send({ method: 'GET', path , cookies});
 }
 
-export function del(path, token) {
-    return send({ method: 'DELETE', path, token });
+export function del(path, data,  cookies) {
+    return send({ method: 'DELETE', path });
 }
 
-export function post(path, data, token) {
-    return send({ method: 'POST', path, data, token });
+export function post(path, data, cookies) {
+    return send({ method: 'POST', path, data,  cookies });
 }
 
-export function put(path, data, token) {
-    return send({ method: 'PUT', path, data, token });
+export function put(path, data, cookies) {
+    return send({ method: 'PUT', path, data });
 }
