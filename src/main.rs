@@ -144,6 +144,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             get(endpoints::profile::get_user_profile),
         )
         .route(
+            "/profile",
+            get(endpoints::profile::get_current_user_profile),
+        )
+        .route(
             "/shop/badges",
             get(endpoints::profile_badges::get_shop_badges),
         )
